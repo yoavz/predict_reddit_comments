@@ -1,0 +1,60 @@
+\documentclass[11pt, twocolumn]{article}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{natbib}
+\usepackage{url}
+\renewcommand{\thesubsection}{\alph{subsection}.}
+
+\begin{document}
+\title{Project Proposal: Predicting Comment Karma by Subreddit}
+\author{Yoav Zimmerman (304125151) \\
+	    Joey Cox (703956821) \\
+	    CS 260: Machine Learning Algorithms \\}
+\maketitle
+
+\section{Motivation}
+Voting systems are a standard part of many online communities. Whether the measure is ``likes'' on a facebook status, “hearts” on a picture in Instagram, or “upvotes” on a submission from Reddit, these voting systems often define which online content receives the most attention. Understanding the dynamics of user behavior in voting systems has applications in the world of online advertising, voting algorithm design, and viral marketing. In this project, we plan on examining the popularity of online content through Reddit \textit{comment karma}. Reddit is a website that aggregates link submissions, and allows users to either “upvote” or “downvote” other users comments on submissions. These votes are aggregated into a single, dynamic karma score for each Reddit comment. By attempting to formulate a model for predicting Reddit \textit{comment karma} on a given subreddit, we hope to gain insights into why and how comments go viral on that subreddit. Furthermore, a prediction function on comment karma for a given subreddit could provide an interesting similarity measure between it and other subreddits.
+
+\section{Background}
+After thorough research, we have not found any academic papers that have worked on the problem of predicting Reddit comment karma. We have, although, found several student projects that are similar in nature. Lamberson et. Al \cite{lamberson} is a project that scraped Reddit and Hacker News comments in an attempt to try and predict karma from content-based, time-based, and other features. Our proposed project differs fundamentally in that we are interested in predicting comment karma by subreddit (training a different regression model for each subreddit), whereas the student project attempts to train a global regression model. In addition, we have found a massive data set of 1.7 billion comments to play with; this data set is a few months old, so we could not find any analysis of it. Lakkaraju \cite{lakkaraju} is another student project in a similar space, but involves predicting the karma of top-level reddit submissions instead of comments, leading to a different feature space. We plan on using ideas from these two projects, but to develop our own unique approach to this problem.
+
+\section{Proposed Work}
+First, we will use Google BigQuery to divide the data into subreddit comment sets. We plan on representing each reddit comment with the following types of features:
+
+\begin{enumerate}
+	\item \textit{Content-Based Features}: bag of words, Sentiment Analysis \cite{sentiment} scores, number of links, number of characters, number of words, average word length, is the post made by a moderator.
+	\item \textit{Time-Based Features}: comment post time, submission post time, difference in comment post time and submission post time
+	\item \textit{Context Features}: depth of comment in the reply chain  
+\end{enumerate}
+Note that for some of these features are directly extracted or calculated from the data set, while other features, such as Context-Based, will require lookup of each comment URL and web scraping tools. 
+\\ \\
+Once we have processed the data, we plan on experimenting with the following learning methods: Gaussian Linear Regression, Ridge Regression, and Support Vector Machine (SVM). Since some our features (such as sentiment analysis scores and bag of words) are likely correlated, we plan on experimenting with both linear and nonlinear kernels. We will train and test at least one model per individual subreddit, and compare performance of each.
+\\ \\
+If our regression models are successful, we hope to furthermore use unsupervised learning to cluster subreddits that vote in similar ways together. This is a reach goal for our project that will be pursued depending on the success of our initial goals.
+
+\section{Timeline}
+We lay out the following timeline for the project: 
+\\ \\
+\textbf{11/5/15} \\ Proposal finalized and turned in. \\
+\textbf{11/5/15 - 11/19/15} \\ (\textit{Phase 1}) Collect, process, and normalize data. \\
+\textbf{11/19/15 - 12/3/15} \\ (\textit{Phase 2}) Experiment with different learning algorithms and models. \\
+\textbf{12/3/15 - 12/11/15} \\ (\textit{Phase 3}) Write paper and prepare poster. \\
+\textbf{12/11/15} \\ Poster session and due date \\
+
+\section{Deliverables/Evaluation}
+The final results of our project will be a paper and a poster describing our learning results in detail.  Our initial learning results will include training errors on all the learning models we will use, as well as testing and validation errors. We will evaluate our results by comparing test error rates across different subreddits. Our reach goal is to use our learned models for the different subreddits to relate them, using unsupervised learning to cluster subreddits that have similar voting patterns together. 
+
+\section{Data}
+We are using the Reddit comment dataset \cite{dataset}, posted in /r/datasets in July 2015.  The data is composed of approximately 1.7 billion JSON objects representing comments and comment metadata.  The data is freely available by torrent and has also been made available on Google BigQuery.  Compressed, the data is 250 GB, but is over 1 TB uncompressed.  As such, we are considering only analyzing a subset of the data.  Luckily, on BigQuery, the data is already split into comments by month for 2015, and by year for 2007-2014.  We want to analyze comments by subreddit, so we will likely pick ten diverse subreddits and analyze comments from those.  We will use BigQuery to obtain our subset of data. 
+
+\section{Software Tools/Libraries} 
+We plan on using Python, and more specifically, scikit-learn \cite{scikit-learn}, to process and do supervised learning on our dataset.  Scikit-learn is a machine learning framework in Python that has built-in algorithms for many learning techniques, including nearest neighbors, SVM, ridge regression, and more. If we choose to increase the subset of data we will use from our dataset, we may progress Amazon EC2 virtual instances to run learning algorithms that would struggle on our computer.
+
+\section{Prior Discussion}
+We spoke with Nikos on Wednesday, November 4th and verified that our project was original and correct in scope.
+
+\bibliographystyle{acm}
+\bibliography{proposal}
+
+\end{document}

@@ -1,0 +1,13 @@
+*.pdf
+*.png
+*.txt
+*.m~
+*.dat
+*.zip
+
+octave-workspace
+*.aux
+*.log
+*.gz
+*.bbl
+*.blg
