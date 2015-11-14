@@ -4,6 +4,7 @@
 *.m~
 *.dat
 *.zip
+*.csv
 
 octave-workspace
 *.aux
@@ -11,3 +12,4 @@ octave-workspace
 *.gz
 *.bbl
 *.blg
+*.pyc
