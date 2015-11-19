@@ -13,3 +13,5 @@ octave-workspace
 *.bbl
 *.blg
 *.pyc
+
+spark-*
