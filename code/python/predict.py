@@ -22,9 +22,9 @@ if __name__ == '__main__':
     data = load_data(args.input_file)
     features = data[:, :-1]
     scores = data[:, -1]
-
     N = features.shape[0]
     split = int(math.floor(0.6*N))
+    print 'Loaded and processed {} comments'.format(N)
 
     train_features = features[:split, :]
     train_scores = scores[:split]

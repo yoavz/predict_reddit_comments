@@ -5,6 +5,7 @@
 *.dat
 *.zip
 *.csv
+*.json
 
 octave-workspace
 *.aux
@@ -15,3 +16,16 @@ octave-workspace
 *.pyc
 
 spark-*
+*.class
+*.log
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
