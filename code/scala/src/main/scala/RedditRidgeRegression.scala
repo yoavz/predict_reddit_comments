@@ -5,9 +5,12 @@ import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature.{CountVectorizer, CountVectorizerModel,
                                     Tokenizer, VectorAssembler}
 import org.apache.spark.ml.regression.LinearRegression
+import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
+import org.apache.spark.ml.evaluation.RegressionEvaluator
+
 import org.apache.spark.ml.feature.CommentTransformer
 
-class RedditLinearRegression(val trainc: DataFrame, val testc: DataFrame) {
+class RedditRidgeRegression(val trainc: DataFrame, val testc: DataFrame) {
 
   var train: DataFrame = trainc;
   var test: DataFrame = testc;
@@ -41,8 +44,22 @@ class RedditLinearRegression(val trainc: DataFrame, val testc: DataFrame) {
     
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, cvModel, processor, assembler, lr));
-    val model = pipeline.fit(train);
-    
+
+    val evaluator = new RegressionEvaluator()
+      .setLabelCol("score_double")
+      .setPredictionCol("prediction");
+
+    val paramGrid = new ParamGridBuilder()
+      .addGrid(lr.regParam, Array(0.0001, 0.001, 0.01, 0.1, 1.0, 10.0))
+      .build();
+
+    val trainValidationSplit = new TrainValidationSplit()
+      .setEstimator(pipeline)
+      .setEvaluator(evaluator)
+      .setEstimatorParamMaps(paramGrid)
+      .setTrainRatio(0.8);
+
+    val model = trainValidationSplit.fit(train);
     model.transform(test).select("body", "features", "score", "prediction").show();
   }
 }

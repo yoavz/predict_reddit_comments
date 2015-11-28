@@ -7,7 +7,7 @@ import org.apache.spark.ml.feature.{CountVectorizer, CountVectorizerModel,
 import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.ml.feature.CommentTransformer
 
-class RedditLinearRegression(val trainc: DataFrame, val testc: DataFrame) {
+class RedditLogisticRegression(val trainc: DataFrame, val testc: DataFrame) {
 
   var train: DataFrame = trainc;
   var test: DataFrame = testc;
