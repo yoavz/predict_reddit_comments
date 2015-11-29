@@ -3,7 +3,7 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.sql.SQLContext
 
 import redditprediction.{RedditLinearRegression, RedditRidgeRegression,
-                         RedditRidgeRegressionTFIDF}
+                         RedditRidgeRegressionTFIDF, RedditLogisticRegression}
 
 object RedditPrediction {
   def main(args: Array[String]) {
@@ -33,8 +33,11 @@ object RedditPrediction {
     val train_to_test = 0.9;
     val Array(train, test) = filtered.randomSplit(Array(train_to_test, 1-train_to_test));
     println(s"Split into ${train.count()} training and ${test.count()} test comments");
-
-    if (mode == "ridge") {
+    
+    if (mode == "logistic") {
+      val logistic = new RedditLogisticRegression(train, test);
+      logistic.run()
+    } else if (mode == "ridge") {
       println("Learning using Ridge Regression");
       val regr = new RedditRidgeRegression(train, test);
       regr.run();

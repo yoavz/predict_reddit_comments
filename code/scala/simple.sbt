@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  name := "Predict Reddit Comments",
+  name := "reddit-prediction",
   version := "1.0",
   scalaVersion := "2.10.4"
 )
@@ -10,9 +10,11 @@ lazy val root = (project in file(".")).
     crossPaths := false,
 
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-core" % "1.5.2",
-      "org.apache.spark" %% "spark-sql" % "1.5.2",
-      "org.apache.spark" %% "spark-mllib" % "1.5.2"
+      "org.apache.spark" %% "spark-core" % "1.5.2" % "provided",
+      "org.apache.spark" %% "spark-sql" % "1.5.2" % "provided",
+      "org.apache.spark" %% "spark-mllib" % "1.5.2" % "provided",
+
+      "joda-time" % "joda-time" % "2.9.1"
 
       // BigQuery Connector
       // "com.google.code.gson" % "gson" % "2.5",
