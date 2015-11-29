@@ -68,6 +68,8 @@ class CommentTransformer(override val uid: String)
       created.getHourOfDay().toDouble
     }
     df4.withColumn($(hourCol), timeHour(col($(timeCol))))
+
+    //TODO: sentiment analysis
   }
 
   override def transformSchema(schema: StructType): StructType = {

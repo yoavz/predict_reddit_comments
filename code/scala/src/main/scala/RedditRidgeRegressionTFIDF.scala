@@ -2,13 +2,11 @@ package redditprediction
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.feature.{HashingTF, IDF, IDFModel,
-                                    Tokenizer, VectorAssembler}
 import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
 import org.apache.spark.ml.evaluation.RegressionEvaluator
 
-import org.apache.spark.ml.feature.CommentTransformer
+import redditprediction.FeaturePipeline
 
 class RedditRidgeRegressionTFIDF(val trainc: DataFrame, val testc: DataFrame) {
 
@@ -16,38 +14,12 @@ class RedditRidgeRegressionTFIDF(val trainc: DataFrame, val testc: DataFrame) {
   var test: DataFrame = testc;
 
   def run() {
-    val tokenizer: Tokenizer = new Tokenizer()
-      .setInputCol("body")
-      .setOutputCol("words");
-
-    val hashing: HashingTF = new HashingTF()
-      .setInputCol("words")
-      .setOutputCol("raw_words_features");
-
-    val idf: IDF = new IDF()
-      .setInputCol("raw_words_features")
-      .setOutputCol("words_features")
-
-    val processor: CommentTransformer = new CommentTransformer()
-      .setWordsCol("words")
-      .setBodyCol("body")
-      .setScoreCol("score_double")
-      .setWordsCountCol("words_count")
-      .setCharsCountCol("chars_count")
-      .setAvgWordLengthCol("avg_word_length")
-      .setLinkCountCol("link_count")
-
-    val assembler = new VectorAssembler()
-      .setInputCols(Array("words_count", "chars_count", "avg_word_length",
-        "link_count", "words_features")) 
-      .setOutputCol("features")
-
     val lr = new LinearRegression()
       .setFeaturesCol("features")
       .setLabelCol("score_double");
     
     val pipeline = new Pipeline()
-      .setStages(Array(tokenizer, hashing, idf, processor, assembler, lr));
+      .setStages(Array(FeaturePipeline, lr));
 
     val evaluator = new RegressionEvaluator()
       .setLabelCol("score_double")
