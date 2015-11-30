@@ -30,6 +30,7 @@ class RedditLogisticRegression(val trainc: DataFrame, val testc: DataFrame) {
       .setStages(Array(FeaturePipeline, bucketizer, multiLr));
 
     val model = pipeline.fit(train);
-    model.transform(test).select("body", "features", "score", "score_bucket", "prediction").show();
+    // model.transform(test).select("body", "features", "score", "score_bucket", "prediction").show();
+    model.transform(test).show()
   }
 }

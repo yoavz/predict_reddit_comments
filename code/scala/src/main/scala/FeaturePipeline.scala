@@ -26,6 +26,8 @@ object FeaturePipeline extends Pipeline {
       .setAvgWordLengthCol("avg_word_length")
       .setLinkCountCol("link_count")
       .setHourCol("hour")
+      .setSentimentCol("sentiment")
+      .loadSentimentMap("../data/AFINN-111.txt")
 
     val hourEncoder: OneHotEncoder = new OneHotEncoder()
       .setInputCol("hour")
@@ -33,7 +35,7 @@ object FeaturePipeline extends Pipeline {
 
     val assembler = new VectorAssembler()
       .setInputCols(Array("words_count", "chars_count", "avg_word_length",
-        "link_count", "words_features", "hour_encoded")) 
+        "link_count", "words_features", "hour_encoded", "sentiment")) 
       .setOutputCol("features")
 
     this.setStages(Array(tokenizer, cvModel, processor, hourEncoder, assembler))
