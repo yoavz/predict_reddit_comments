@@ -21,6 +21,3 @@ OPTIONS="-k $KEY_NAME
  --copy-aws-credentials"
 
 $SPARK_HOME/ec2/spark-ec2 $OPTIONS $@ 
-
-# # sbt assembly && 
-# $SPARK_HOME/bin/spark-submit target/reddit-prediction-assembly-1.0.jar $@
