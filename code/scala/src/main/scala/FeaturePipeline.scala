@@ -27,7 +27,7 @@ object FeaturePipeline extends Pipeline {
       .setLinkCountCol("link_count")
       .setHourCol("hour")
       .setSentimentCol("sentiment")
-      .loadSentimentMap("/data/AFINN-111.txt")
+      .loadSentimentMap("/root/data/AFINN-111.txt")
 
     val hourEncoder: OneHotEncoder = new OneHotEncoder()
       .setInputCol("hour")
