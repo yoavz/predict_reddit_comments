@@ -35,6 +35,10 @@ object FeaturePipeline extends Pipeline {
   val assembler = new VectorAssembler()
     .setInputCols(Array("words_features", "chars_count", "avg_word_length",
       "link_count", "words_count", "hour_encoded", "sentiment")) 
+    // .setInputCols(Array("chars_count", "avg_word_length",
+    //   "link_count", "words_count", "hour_encoded", "sentiment")) 
+    // .setInputCols(Array("chars_count", "avg_word_length",
+    //   "link_count", "words_count", "sentiment")) 
     .setOutputCol("features")
 
   this.setStages(Array(tokenizer, cv, processor, hourEncoder, assembler))

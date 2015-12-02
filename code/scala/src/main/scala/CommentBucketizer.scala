@@ -8,23 +8,20 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf, max}
 import org.apache.spark.sql.types.{StructType, StructField}
 
-class CommentBucketizer(override val uid: String, numBucketsA: Int) 
+class CommentBucketizer(override val uid: String) 
   extends Estimator[CommentBucketizerModel] {
-  def this(numBuckets: Int) = 
-    this(Identifiable.randomUID("commentBucketizer"), numBuckets)
+  def this() = this(Identifiable.randomUID("commentBucketizer"))
 
   val scoreBucketCol: Param[String] = new Param[String](this, "score_bucket", "");
   def setScoreBucketCol(value: String): this.type = set(scoreBucketCol, value)
   val scoreCol: Param[String] = new Param[String](this, "score", "");
   def setScoreCol(value: String): this.type = set(scoreCol, value)
 
-  val numBuckets: Int = numBucketsA;
-
   override def fit(dataset: DataFrame): CommentBucketizerModel = {
     transformSchema(dataset.schema, logging = true);
 
     val maxScore = dataset.select(max($(scoreCol))).head().getDouble(0)
-    val model = new CommentBucketizerModel(numBuckets, maxScore)
+    val model = new CommentBucketizerModel(maxScore)
     model.setScoreBucketCol($(scoreBucketCol))
     model.setScoreCol($(scoreCol))
     model
@@ -39,12 +36,11 @@ class CommentBucketizer(override val uid: String, numBucketsA: Int)
   override def copy(extra: ParamMap): CommentBucketizer = defaultCopy(extra)
 }
 
-class CommentBucketizerModel(override val uid: String, 
-                             numBucketsA: Int, maxScoreA: Double)
+class CommentBucketizerModel(override val uid: String, maxScoreA: Double)
   extends Model[CommentBucketizerModel] {
 
-  def this(numBuckets: Int, maxScore: Double) = 
-    this(Identifiable.randomUID("commentBucketizerModel"), numBuckets, maxScore)
+  def this(maxScore: Double) = 
+    this(Identifiable.randomUID("commentBucketizerModel"), maxScore)
 
   val scoreBucketCol: Param[String] = new Param[String](this, "score_bucket", "");
   def setScoreBucketCol(value: String): this.type = set(scoreBucketCol, value)
@@ -52,7 +48,14 @@ class CommentBucketizerModel(override val uid: String,
   def setScoreCol(value: String): this.type = set(scoreCol, value)
 
   var maxScore: Double = maxScoreA;
-  var numBuckets: Int = numBucketsA;
+
+  def getBucketRange(bucket: Int): (Int, Int) = {
+    if (bucket <= 0) {
+      (-1, -1)
+    } else {
+      (scala.math.pow(2, bucket-1).toInt, scala.math.pow(2, bucket).toInt)
+    }
+  }
 
   override def transform(dataset: DataFrame): DataFrame = {
     transformSchema(dataset.schema, logging = true);
@@ -74,5 +77,8 @@ class CommentBucketizerModel(override val uid: String,
     StructType(outputFields)
   }
 
-  override def copy(extra: ParamMap): CommentBucketizerModel = defaultCopy(extra)
+  override def copy(extra: ParamMap): CommentBucketizerModel = {
+    val that = new CommentBucketizerModel(uid, maxScore)
+    copyValues(that, extra)
+  }
 }  

@@ -35,7 +35,8 @@ object RedditPrediction {
     println(s"Split into ${train.count()} training and ${test.count()} test comments");
     
     if (mode == "logistic") {
-      val logistic = new RedditLogisticRegression(train, test);
+      val logistic = new RedditLogisticRegression(train, test, 
+        Array(0.0001, 0.001, 0.01, 0.1, 1.0, 10.0));
       logistic.run()
     } else if (mode == "ridge") {
       println("Learning using Ridge Regression");
