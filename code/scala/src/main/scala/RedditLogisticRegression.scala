@@ -1,9 +1,9 @@
 package redditprediction
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.{OneVsRest, LogisticRegression}
-import org.apache.spark.ml.feature.CommentBucketizer
+import org.apache.spark.ml.{Pipeline, PipelineModel}
+import org.apache.spark.ml.classification.{OneVsRest, OneVsRestModel, LogisticRegression, LogisticRegressionModel}
+import org.apache.spark.ml.feature.{CommentBucketizer, CountVectorizerModel}
 
 import redditprediction.FeaturePipeline
 
@@ -30,7 +30,29 @@ class RedditLogisticRegression(val trainc: DataFrame, val testc: DataFrame) {
       .setStages(Array(FeaturePipeline, bucketizer, multiLr));
 
     val model = pipeline.fit(train);
-    // model.transform(test).select("body", "features", "score", "score_bucket", "prediction").show();
-    model.transform(test).show()
+
+    // recover the cvModel from the Feature Pipeline
+    val cvModel: CountVectorizerModel = 
+      model.stages(0).asInstanceOf[PipelineModel]
+           .stages(1).asInstanceOf[CountVectorizerModel];
+
+    // display the most important feautres
+    model
+      .stages(2).asInstanceOf[OneVsRestModel]
+      .models.zipWithIndex
+      .foreach{ case (c, i) =>
+        println(s"Classifier bucket ${i}");
+        val weights = c.asInstanceOf[LogisticRegressionModel].weights;
+        weights
+          .toArray.toList.zipWithIndex
+          .sortWith((a, b) => a._1 > b._1).take(5)
+          .foreach{ case (w, i) => 
+            if (i < cvModel.vocabulary.length) {
+              println(s"\t${w}\t${cvModel.vocabulary(i)}");
+            } else {
+              println(s"\t${w}\tother feature");
+            }
+          };
+      };
   }
 }
