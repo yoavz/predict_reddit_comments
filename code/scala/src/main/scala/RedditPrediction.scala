@@ -1,9 +1,8 @@
+package redditprediction
+
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
 import org.apache.spark.sql.SQLContext
-
-import redditprediction.{RedditLinearRegression, RedditRidgeRegression,
-                         RedditRidgeRegressionTFIDF, RedditLogisticRegression}
 
 object RedditPrediction {
   def main(args: Array[String]) {
@@ -35,9 +34,11 @@ object RedditPrediction {
     println(s"Split into ${train.count()} training and ${test.count()} test comments");
     
     if (mode == "logistic") {
-      val logistic = new RedditLogisticRegression(train, test, 
-        Array(0.0001, 0.001, 0.01, 0.1, 1.0, 10.0));
-      logistic.run()
+      val logistic = RedditLogisticRegression;
+      val regs: Array[Double] = (-5 to 5).toArray.map(x => scala.math.pow(2, x))
+      logistic.trainWithRegularization(train, regs)
+      logistic.test(test)
+      logistic.explainTraining
     } else if (mode == "ridge") {
       println("Learning using Ridge Regression");
       val regr = new RedditRidgeRegression(train, test);

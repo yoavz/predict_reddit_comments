@@ -2,52 +2,23 @@ package redditprediction
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.{Pipeline, Model, PipelineModel}
-import org.apache.spark.ml.classification.{OneVsRest, OneVsRestModel, LogisticRegression, LogisticRegressionModel}
-import org.apache.spark.ml.feature.{CommentBucketizer, CommentBucketizerModel, CountVectorizerModel}
+import org.apache.spark.ml.classification.{Classifier, OneVsRest, OneVsRestModel, LogisticRegression, LogisticRegressionModel}
+import org.apache.spark.ml.feature.{CountVectorizerModel}
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 
-import redditprediction.FeaturePipeline
+import org.apache.spark.ml.feature.{CommentBucketizer, CommentBucketizerModel}
 
-class RedditLogisticRegression(val trainc: DataFrame, val testc: DataFrame,
-                               val regs: Array[Double]) {
+object RedditLogisticRegression extends RedditClassification {
 
-  var train: DataFrame = trainc;
-  var test: DataFrame = testc;
-
-  def run() {
-
-    // Set up the pipeline
-    val bucketizer: CommentBucketizer = new CommentBucketizer()
-      .setScoreCol("score_double")
-      .setScoreBucketCol("score_bucket")
-    val lr = new LogisticRegression()
+  override def getClassifier: LogisticRegression = {
+    new LogisticRegression()
       .setFeaturesCol("features")
       .setLabelCol("score_bucket");
-    val multiLr = new OneVsRest()
-      .setClassifier(lr)
-      .setFeaturesCol("features")
-      .setLabelCol("score_bucket");
-    val pipeline = new Pipeline()
-      .setStages(Array(FeaturePipeline, bucketizer, multiLr));
-    // val model = pipeline.fit(train);
+  }
 
-    // Evaluation and tuning
-    val evaluator = new MulticlassClassificationEvaluator()
-      .setLabelCol("score_bucket")
-      .setPredictionCol("prediction")
-    val paramGrid = new ParamGridBuilder()
-      .addGrid(lr.regParam, regs)
-      .build();
-    val trainValidationSplit = new TrainValidationSplit()
-      .setEstimator(pipeline)
-      .setEvaluator(evaluator)
-      .setEstimatorParamMaps(paramGrid)
-      .setTrainRatio(0.8);
-
-    println("Training and tuning..."); 
-    val allModels = trainValidationSplit.fit(train);
-    val model = allModels.bestModel.asInstanceOf[PipelineModel];
+  override def explainTraining() = {
+    val model = getModel 
     val multiLrModel = model.stages(2).asInstanceOf[OneVsRestModel];
     // bestModel.transform(test).show()
     
@@ -77,12 +48,38 @@ class RedditLogisticRegression(val trainc: DataFrame, val testc: DataFrame,
             }
           };
       };
+  }
 
-    // test accuracy
-    val predictions = model.transform(test);
-    val accuracy = predictions.filter("score_bucket = prediction")
-                              .count().toDouble / predictions.count().toDouble
+  def trainWithRegularization(dataset: DataFrame, regs: Array[Double]) = {
 
-    println(s"Test Accuracy: ${accuracy}")
+    // Set up the pipeline
+    val bucketizer: CommentBucketizer = new CommentBucketizer()
+      .setScoreCol("score_double")
+      .setScoreBucketCol("score_bucket")
+    val lr = getClassifier
+    val multiLr = new OneVsRest()
+      .setClassifier(lr)
+      .setFeaturesCol("features")
+      .setLabelCol("score_bucket");
+    val pipeline = new Pipeline()
+      .setStages(Array(FeaturePipeline, bucketizer, multiLr));
+
+    // Evaluation and tuning
+    val evaluator = new MulticlassClassificationEvaluator()
+      .setLabelCol("score_bucket")
+      .setPredictionCol("prediction")
+    val paramGrid = new ParamGridBuilder()
+      .addGrid(lr.regParam, regs)
+      .build();
+    val trainValidationSplit = new TrainValidationSplit()
+      .setEstimator(pipeline)
+      .setEvaluator(evaluator)
+      .setEstimatorParamMaps(paramGrid)
+      .setTrainRatio(0.8);
+
+    println("Training and tuning..."); 
+    val allModels = trainValidationSplit.fit(dataset);
+    val model = allModels.bestModel.asInstanceOf[PipelineModel];
+    setModel(model)
   }
 }

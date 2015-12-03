@@ -3,7 +3,7 @@ package redditprediction
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     OneHotEncoder}
-import org.apache.spark.ml.feature.{CommentTransformer, CommentBucketizer}
+import org.apache.spark.ml.feature.{CommentTransformer}
 
 object FeaturePipeline extends Pipeline {
   // initialization
