@@ -25,29 +25,29 @@ object RedditLogisticRegression extends RedditClassification {
     // recover the cvModel from the Feature Pipeline
     val cvModel: CountVectorizerModel = 
       model.stages(0).asInstanceOf[PipelineModel]
-           .stages(1).asInstanceOf[CountVectorizerModel];
+           .stages(2).asInstanceOf[CountVectorizerModel];
     val bucketizerModel: CommentBucketizerModel =
       model.stages(1).asInstanceOf[CommentBucketizerModel];
 
-    println("Extracting most important features"); 
     // display the most important feautres
-    multiLrModel
-      .models.zipWithIndex
-      .foreach{ case (c, i) =>
-        val lr = c.asInstanceOf[LogisticRegressionModel]
-        println(s"""Classifier bucket ${bucketizerModel.getBucketRange(i)}, 
-                    |Reg param: ${lr.getRegParam}""".stripMargin);
-        lr.weights
-          .toArray.toList.zipWithIndex
-          .sortWith((a, b) => a._1 > b._1).take(5)
-          .foreach{ case (w, i) => 
-            if (i < cvModel.vocabulary.length) {
-              println(s"\t${w}\t${cvModel.vocabulary(i)} (word ${i})");
-            } else {
-              println(s"\t${w}\tfeature ${i}");
-            }
-          };
-      };
+    // println("Extracting most important features"); 
+    // multiLrModel
+    //   .models.zipWithIndex
+    //   .foreach{ case (c, i) =>
+    //     val lr = c.asInstanceOf[LogisticRegressionModel]
+    //     println(s"""Classifier bucket ${bucketizerModel.getBucketRange(i)}, 
+    //                 |Reg param: ${lr.getRegParam}""".stripMargin);
+    //     lr.weights
+    //       .toArray.toList.zipWithIndex
+    //       .sortWith((a, b) => a._1 > b._1).take(5)
+    //       .foreach{ case (w, i) => 
+    //         if (i < cvModel.vocabulary.length) {
+    //           println(s"\t${w}\t${cvModel.vocabulary(i)} (word ${i})");
+    //         } else {
+    //           println(s"\t${w}\tfeature ${i}");
+    //         }
+    //       };
+    //   };
   }
 
   def trainWithRegularization(dataset: DataFrame, regs: Array[Double]) = {
@@ -81,5 +81,10 @@ object RedditLogisticRegression extends RedditClassification {
     val allModels = trainValidationSplit.fit(dataset);
     val model = allModels.bestModel.asInstanceOf[PipelineModel];
     setModel(model)
+
+    println(s"Tried C: ${regs.deep.mkString(", ")}");
+    val bestLr = model.stages(2).asInstanceOf[OneVsRestModel]
+                      .models(0).asInstanceOf[LogisticRegressionModel];
+    println(s"Best C: ${bestLr.getRegParam}")
   }
 }

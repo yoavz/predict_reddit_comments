@@ -28,6 +28,13 @@ abstract class RedditClassification {
     println("explainTraining not defined");
   }
 
+  def explainBucketDistribution(dataset: DataFrame, bucketCol: String) = {
+    val model = getModel
+    val bucketizerModel: CommentBucketizerModel =
+      model.stages(1).asInstanceOf[CommentBucketizerModel];
+    bucketizerModel.explainBucketDistribution(dataset, bucketCol)
+  }
+
   def train(dataset: DataFrame) = {
     // Set up the pipeline
     val bucketizer: CommentBucketizer = new CommentBucketizer()
@@ -52,7 +59,13 @@ abstract class RedditClassification {
     val predictions = model.transform(dataset);
     val accuracy = predictions.filter("score_bucket = prediction")
                               .count().toDouble / predictions.count().toDouble
-    println(s"Test Accuracy: ${accuracy}")
+    println(s"Test Accuracy: ${accuracy}");
+    println(s"-");
+    println(s"Actual distribution:")
+    explainBucketDistribution(predictions, "score_bucket")
+    println(s"-");
+    println(s"Prediction distribution:")
+    explainBucketDistribution(predictions, "prediction")
   }
 
   // TODO: saving models may be hard :(

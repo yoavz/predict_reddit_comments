@@ -57,6 +57,19 @@ class CommentBucketizerModel(override val uid: String, maxScoreA: Double)
     }
   }
 
+  def explainBucketDistribution(dataset: DataFrame, bucketCol: String) = {
+    val count = dataset.count()
+    val buckets = dataset.groupBy(bucketCol).count()
+                         .rdd.map(r => (r.getDouble(0), r.getLong(1)))
+                         .collect().sortBy(_._1)
+    buckets.foreach{ t =>
+      val (bucket, bucket_count) = t
+      println(s"""Score Bucket ${getBucketRange(bucket.toInt)}: 
+                  |${bucket_count.toDouble / count.toDouble} 
+                  |(${bucket_count.toDouble})""".stripMargin)
+    } 
+  }
+
   override def transform(dataset: DataFrame): DataFrame = {
     transformSchema(dataset.schema, logging = true);
     // Assign a score bucket of 0 to negative scores

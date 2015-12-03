@@ -38,7 +38,6 @@ object RedditPrediction {
       val regs: Array[Double] = (-5 to 5).toArray.map(x => scala.math.pow(2, x))
       logistic.trainWithRegularization(train, regs)
       logistic.test(test)
-      logistic.explainTraining
     } else if (mode == "ridge") {
       println("Learning using Ridge Regression");
       val regr = new RedditRidgeRegression(train, test);

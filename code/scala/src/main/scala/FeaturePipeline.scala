@@ -2,7 +2,7 @@ package redditprediction
 
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
-                                    OneHotEncoder}
+                                    StopWordsRemover, OneHotEncoder}
 import org.apache.spark.ml.feature.{CommentTransformer}
 
 object FeaturePipeline extends Pipeline {
@@ -11,8 +11,12 @@ object FeaturePipeline extends Pipeline {
     .setInputCol("body")
     .setOutputCol("words");
 
-  val cv: CountVectorizer = new CountVectorizer()
+  val stopwords: StopWordsRemover = new StopWordsRemover()
     .setInputCol("words")
+    .setOutputCol("filtered")
+
+  val cv: CountVectorizer = new CountVectorizer()
+    .setInputCol("filtered")
     .setOutputCol("words_features");
 
   val processor: CommentTransformer = new CommentTransformer()
@@ -41,5 +45,5 @@ object FeaturePipeline extends Pipeline {
     //   "link_count", "words_count", "sentiment")) 
     .setOutputCol("features")
 
-  this.setStages(Array(tokenizer, cv, processor, hourEncoder, assembler))
+  this.setStages(Array(tokenizer, stopwords, cv, processor, hourEncoder, assembler))
 }
