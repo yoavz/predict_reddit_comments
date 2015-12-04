@@ -6,8 +6,6 @@ import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
 import org.apache.spark.ml.evaluation.RegressionEvaluator
 
-import redditprediction.FeaturePipeline
-
 class RedditRidgeRegressionTFIDF(val trainc: DataFrame, val testc: DataFrame) {
 
   var train: DataFrame = trainc;
@@ -19,7 +17,7 @@ class RedditRidgeRegressionTFIDF(val trainc: DataFrame, val testc: DataFrame) {
       .setLabelCol("score_double");
     
     val pipeline = new Pipeline()
-      .setStages(Array(FeaturePipeline, lr));
+      .setStages(Array(lr));
 
     val evaluator = new RegressionEvaluator()
       .setLabelCol("score_double")

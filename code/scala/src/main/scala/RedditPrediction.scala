@@ -3,7 +3,10 @@ package redditprediction
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
 import org.apache.spark.sql.SQLContext
+import org.apache.spark.ml.{Pipeline, PipelineModel}
 
+// TODO: make the feature pipeline part of the preprocessing process
+//       it's all wrong! D:
 object RedditPrediction {
   def main(args: Array[String]) {
 
@@ -29,15 +32,30 @@ object RedditPrediction {
                      .filter(df("body") !== "[deleted]");
     println(s"${filtered.count()} total comments after filtering");
 
+    // Preprocessing
+    var featurePipeline: Pipeline = new FeaturePipeline();
+    if (mode == "sentiment") {
+      featurePipeline = new SentimentFeaturePipeline();
+    } 
+    val featurePipelineModel: PipelineModel = featurePipeline.fit(filtered)
+    val featured = featurePipelineModel.transform(filtered) 
+    println(s"${featured.count()} total comments after preprocessing");
+
     val train_to_test = 0.9;
-    val Array(train, test) = filtered.randomSplit(Array(train_to_test, 1-train_to_test));
+    val Array(train, test) = featured.randomSplit(Array(train_to_test, 1-train_to_test));
     println(s"Split into ${train.count()} training and ${test.count()} test comments");
     
-    if (mode == "logistic") {
-      val logistic = RedditLogisticRegression;
+    if (mode == "logistic" || mode == "sentiment") {
+      val logistic = new RedditLogisticRegression();
       val regs: Array[Double] = (-5 to 5).toArray.map(x => scala.math.pow(2, x))
       logistic.trainWithRegularization(train, regs)
       logistic.test(test)
+      println("-") 
+      println(s"Actual (training) distribution:")
+      logistic.getBucketizer.explainBucketDistribution(train, "score_bucket")
+      println("-") 
+      println(s"Predicted (test) distribution:")
+      logistic.getBucketizer.explainBucketDistribution(test, "prediction")
     } else if (mode == "ridge") {
       println("Learning using Ridge Regression");
       val regr = new RedditRidgeRegression(train, test);

@@ -2,10 +2,11 @@ package redditprediction
 
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
-                                    StopWordsRemover, OneHotEncoder}
+                                    StopWordsRemover, OneHotEncoder, 
+                                    CountVectorizerModel}
 import org.apache.spark.ml.feature.{CommentTransformer}
 
-object FeaturePipeline extends Pipeline {
+class FeaturePipeline extends Pipeline {
   // initialization
   val tokenizer: Tokenizer = new Tokenizer()
     .setInputCol("body")
@@ -45,5 +46,11 @@ object FeaturePipeline extends Pipeline {
     //   "link_count", "words_count", "sentiment")) 
     .setOutputCol("features")
 
-  this.setStages(Array(tokenizer, stopwords, cv, processor, hourEncoder, assembler))
+  this.setStages(Array(tokenizer, stopwords, cv, 
+                       processor, hourEncoder, assembler))
+
+
+  def getCountVectorizerModel: CountVectorizerModel = {
+    this.getStages(2).asInstanceOf[CountVectorizerModel]
+  }
 }
