@@ -38,8 +38,6 @@ class RedditRegression {
                               error(col("score_double"), col("prediction")));
     val rmse = sqError.agg(avg(col("sq_err"))).show()
 
-    // sqError.avg("
-    //
-    // sqError.select("score_double", "prediction", "sq_err").show()
+    sqError.select("body", "score_double", "prediction", "sq_err").show(10)
   }
 }

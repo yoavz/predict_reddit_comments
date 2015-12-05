@@ -40,7 +40,7 @@ object RedditPrediction {
 
     // Preprocessing
     var featurePipeline: FeaturePipeline = new FeaturePipeline();
-    if (features = "sentiment") {
+    if (features == "sentiment") {
       featurePipeline = new SentimentFeaturePipeline();
     } 
     val featurePipelineModel: FeaturePipelineModel = featurePipeline.fit(filtered)
@@ -54,7 +54,7 @@ object RedditPrediction {
     val regs: Array[Double] = (-5 to 5).toArray.map(x => scala.math.pow(2, x))
 
     // Do the training
-    if (mode == "logistic")
+    if (mode == "logistic") {
       val logistic = new RedditLogisticRegression();
       logistic.trainWithRegularization(train, regs)
       logistic.test(test)
