@@ -1,17 +1,14 @@
 package redditprediction
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.regression.LinearRegression
+import org.apache.spark.ml.{Pipeline, PipelineModel}
+import org.apache.spark.ml.regression.{LinearRegression, LinearRegressionModel}
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
 import org.apache.spark.ml.evaluation.RegressionEvaluator
 
-class RedditRidgeRegression(val trainc: DataFrame, val testc: DataFrame) {
+class RedditRidgeRegression extends RedditRegression {
 
-  var train: DataFrame = trainc;
-  var test: DataFrame = testc;
-
-  def run() {
+  def train(dataset: DataFrame, regs: Array[Double]) = {
     val lr = new LinearRegression()
       .setFeaturesCol("features")
       .setLabelCol("score_double");
@@ -24,7 +21,7 @@ class RedditRidgeRegression(val trainc: DataFrame, val testc: DataFrame) {
       .setPredictionCol("prediction");
 
     val paramGrid = new ParamGridBuilder()
-      .addGrid(lr.regParam, Array(0.0001, 0.001, 0.01, 0.1, 1.0, 10.0))
+      .addGrid(lr.regParam, regs)
       .build();
 
     val trainValidationSplit = new TrainValidationSplit()
@@ -33,7 +30,12 @@ class RedditRidgeRegression(val trainc: DataFrame, val testc: DataFrame) {
       .setEstimatorParamMaps(paramGrid)
       .setTrainRatio(0.8);
 
-    val model = trainValidationSplit.fit(train);
-    model.transform(test).select("body", "features", "score", "prediction").show();
+    val allModels = trainValidationSplit.fit(dataset);
+    val model = allModels.bestModel.asInstanceOf[PipelineModel];
+    setModel(model)
+
+    println(s"Tried C: ${regs.deep.mkString(", ")}");
+    val bestLr = model.stages(0).asInstanceOf[LinearRegressionModel]
+    println(s"Best C: ${bestLr.getRegParam}")
   }
 }

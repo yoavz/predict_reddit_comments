@@ -22,17 +22,6 @@ abstract class RedditClassification {
     }
   }
 
-  // var _featurePipeline: Option[Pipeline] = None
-  // def setFeaturePipeline(pipeline: Pipeline) = {
-  //   _featurePipeline = Some(pipeline)
-  // }
-  // def getFeaturePipeline() = {
-  //   _featurePipeline match {
-  //     case Some(value) => value
-  //     case None => throw new RuntimeException("Pipeline not set.")
-  //   }
-  // }
-  //
   // abstract methods
   def getClassifier: Classifier[_, _, _]
   def explainTraining = {
@@ -60,12 +49,6 @@ abstract class RedditClassification {
     val accuracy = predictions.filter("score_bucket = prediction")
                               .count().toDouble / predictions.count().toDouble
     println(s"Test Accuracy: ${accuracy}");
-    // println(s"-");
-    // println(s"Actual distribution:")
-    // explainBucketDistribution(predictions, "score_bucket")
-    // println(s"-");
-    // println(s"Prediction distribution:")
-    // explainBucketDistribution(predictions, "prediction")
   }
 
   // TODO: saving models may be hard :(
