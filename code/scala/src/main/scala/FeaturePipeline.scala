@@ -1,12 +1,13 @@
 package redditprediction
 
-import org.apache.spark.ml.Pipeline
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     StopWordsRemover, OneHotEncoder, 
                                     CountVectorizerModel}
-import org.apache.spark.ml.feature.{CommentTransformer}
+import org.apache.spark.ml.feature.{CommentTransformer, CommentBucketizer}
 
-class FeaturePipeline extends Pipeline {
+class FeaturePipeline {
   // initialization
   val tokenizer: Tokenizer = new Tokenizer()
     .setInputCol("body")
@@ -37,20 +38,28 @@ class FeaturePipeline extends Pipeline {
     .setInputCol("hour")
     .setOutputCol("hour_encoded")
 
+  val bucketizer: CommentBucketizer = new CommentBucketizer()
+    .setScoreCol("score_double")
+    .setScoreBucketCol("score_bucket")
+
   val assembler = new VectorAssembler()
     .setInputCols(Array("words_features", "chars_count", "avg_word_length",
       "link_count", "words_count", "hour_encoded", "sentiment")) 
-    // .setInputCols(Array("chars_count", "avg_word_length",
-    //   "link_count", "words_count", "hour_encoded", "sentiment")) 
-    // .setInputCols(Array("chars_count", "avg_word_length",
-    //   "link_count", "words_count", "sentiment")) 
     .setOutputCol("features")
 
-  this.setStages(Array(tokenizer, stopwords, cv, 
-                       processor, hourEncoder, assembler))
 
-
-  def getCountVectorizerModel: CountVectorizerModel = {
-    this.getStages(2).asInstanceOf[CountVectorizerModel]
+  def getPipeline: Pipeline = {
+    new Pipeline().setStages(Array(tokenizer, stopwords, cv, 
+                                   processor, bucketizer, 
+                                   hourEncoder, assembler))
   }
+
+  def fit(dataset: DataFrame): FeaturePipelineModel = {
+    new FeaturePipelineModel(getPipeline.fit(dataset))
+  }
+}
+
+class FeaturePipelineModel(modelc: PipelineModel) {
+  val model: PipelineModel = modelc
+  def transform(dataset: DataFrame): DataFrame = { model.transform(dataset) };
 }

@@ -7,8 +7,6 @@ import org.apache.spark.ml.feature.{CountVectorizerModel}
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 
-import org.apache.spark.ml.feature.{CommentBucketizer, CommentBucketizerModel}
-
 class RedditLogisticRegression extends RedditClassification {
 
   override def getClassifier: LogisticRegression = {
@@ -53,16 +51,13 @@ class RedditLogisticRegression extends RedditClassification {
   def trainWithRegularization(dataset: DataFrame, regs: Array[Double]) = {
 
     // Set up the pipeline
-    val bucketizer: CommentBucketizer = new CommentBucketizer()
-      .setScoreCol("score_double")
-      .setScoreBucketCol("score_bucket")
     val lr = getClassifier
     val multiLr = new OneVsRest()
       .setClassifier(lr)
       .setFeaturesCol("features")
       .setLabelCol("score_bucket");
     val pipeline = new Pipeline()
-      .setStages(Array(bucketizer, multiLr));
+      .setStages(Array(multiLr));
 
     // Evaluation and tuning
     val evaluator = new MulticlassClassificationEvaluator()
@@ -83,17 +78,13 @@ class RedditLogisticRegression extends RedditClassification {
     setModel(model)
 
     println(s"Tried C: ${regs.deep.mkString(", ")}");
-    val bestLr = model.stages(1).asInstanceOf[OneVsRestModel]
+    val bestLr = model.stages(0).asInstanceOf[OneVsRestModel]
                       .models(0).asInstanceOf[LogisticRegressionModel];
     println(s"Best C: ${bestLr.getRegParam}")
   }
 
   def trainReg(dataset: DataFrame, reg: Double) = {
 
-    // Set up the pipeline
-    val bucketizer: CommentBucketizer = new CommentBucketizer()
-      .setScoreCol("score_double")
-      .setScoreBucketCol("score_bucket")
     val lr = getClassifier
       .setRegParam(reg)
     val multiLr = new OneVsRest()
@@ -101,7 +92,7 @@ class RedditLogisticRegression extends RedditClassification {
       .setFeaturesCol("features")
       .setLabelCol("score_bucket");
     val pipeline = new Pipeline()
-      .setStages(Array(bucketizer, multiLr));
+      .setStages(Array(multiLr));
 
     println(s"Training using reg param: ${reg}..."); 
     val model = pipeline.fit(dataset)

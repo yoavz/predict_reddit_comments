@@ -1,14 +1,14 @@
 package redditprediction
 
-import org.apache.spark.ml.Pipeline
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     StopWordsRemover, OneHotEncoder}
-import org.apache.spark.ml.feature.{WordRemover, CommentTransformer}
+import org.apache.spark.ml.feature.{WordRemover, CommentTransformer, CommentBucketizer}
 
-
-class SentimentFeaturePipeline extends Pipeline {
+class SentimentFeaturePipeline extends FeaturePipeline {
   // initialization
-  val tokenizer: Tokenizer = new Tokenizer()
+  override val tokenizer: Tokenizer = new Tokenizer()
     .setInputCol("body")
     .setOutputCol("raw_words");
 
@@ -17,11 +17,11 @@ class SentimentFeaturePipeline extends Pipeline {
     .setOutputCol("words")
     .loadSentimentMap("/root/data/AFINN-111.txt")
 
-  val cv: CountVectorizer = new CountVectorizer()
+  override val cv: CountVectorizer = new CountVectorizer()
     .setInputCol("words")
     .setOutputCol("features");
 
-  val processor: CommentTransformer = new CommentTransformer()
+  override val processor: CommentTransformer = new CommentTransformer()
     .setWordsCol("words")
     .setBodyCol("body")
     .setScoreCol("score_double")
@@ -34,6 +34,15 @@ class SentimentFeaturePipeline extends Pipeline {
     .setSentimentCol("sentiment")
     .loadSentimentMap("/root/data/AFINN-111.txt")
 
+  override val bucketizer: CommentBucketizer = new CommentBucketizer()
+    .setScoreCol("score_double")
+    .setScoreBucketCol("score_bucket")
+
+  override def getPipeline: Pipeline = {
+    new Pipeline().setStages(Array(tokenizer, remover, cv, 
+                                   processor, bucketizer))
+  }
+
   // val hourEncoder: OneHotEncoder = new OneHotEncoder()
   //   .setInputCol("hour")
   //   .setOutputCol("hour_encoded")
@@ -42,6 +51,4 @@ class SentimentFeaturePipeline extends Pipeline {
   //   .setInputCols(Array("words_features", "chars_count", "avg_word_length",
   //     "link_count", "words_count", "hour_encoded", "sentiment")) 
     // .setOutputCol("features")
-
-  this.setStages(Array(tokenizer, remover, cv, processor))
 }

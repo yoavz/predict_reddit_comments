@@ -4,9 +4,8 @@ import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.ml.{Pipeline, PipelineModel}
+import org.apache.spark.ml.feature.{CommentBucketizerModel}
 
-// TODO: make the feature pipeline part of the preprocessing process
-//       it's all wrong! D:
 object RedditPrediction {
   def main(args: Array[String]) {
 
@@ -33,11 +32,11 @@ object RedditPrediction {
     println(s"${filtered.count()} total comments after filtering");
 
     // Preprocessing
-    var featurePipeline: Pipeline = new FeaturePipeline();
+    var featurePipeline: FeaturePipeline = new FeaturePipeline();
     if (mode == "sentiment") {
       featurePipeline = new SentimentFeaturePipeline();
     } 
-    val featurePipelineModel: PipelineModel = featurePipeline.fit(filtered)
+    val featurePipelineModel: FeaturePipelineModel = featurePipeline.fit(filtered)
     val featured = featurePipelineModel.transform(filtered) 
     println(s"${featured.count()} total comments after preprocessing");
 
@@ -52,10 +51,12 @@ object RedditPrediction {
       logistic.test(test)
       println("-") 
       println(s"Actual (training) distribution:")
-      logistic.getBucketizer.explainBucketDistribution(train, "score_bucket")
-      println("-") 
-      println(s"Predicted (test) distribution:")
-      logistic.getBucketizer.explainBucketDistribution(test, "prediction")
+      val bucketizer: CommentBucketizerModel = 
+        featurePipelineModel.model.stages(4).asInstanceOf[CommentBucketizerModel]
+      bucketizer.explainBucketDistribution(featured, "score_bucket")
+      // println("-") 
+      // println(s"Predicted (test) distribution:")
+      // featurePipelineModel.getBucketizer.explainBucketDistribution(test, "prediction")
     } else if (mode == "ridge") {
       println("Learning using Ridge Regression");
       val regr = new RedditRidgeRegression(train, test);

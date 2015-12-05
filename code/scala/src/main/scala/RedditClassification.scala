@@ -39,33 +39,18 @@ abstract class RedditClassification {
     println("explainTraining not defined");
   }
 
-  // def explainBucketDistribution(dataset: DataFrame, bucketCol: String) = {
-  //   val model = getModel
-  //   val bucketizerModel: CommentBucketizerModel =
-  //     model.stages(1).asInstanceOf[CommentBucketizerModel];
-  //   bucketizerModel.explainBucketDistribution(dataset, bucketCol)
-  // }
-
   def train(dataset: DataFrame) = {
     // Set up the pipeline
-    // TODO: move bucketizer to feature pipeline?
-    val bucketizer: CommentBucketizer = new CommentBucketizer()
-      .setScoreCol("score_double")
-      .setScoreBucketCol("score_bucket")
     val lr = getClassifier
     val multiLr = new OneVsRest()
       .setClassifier(lr)
       .setFeaturesCol("features")
       .setLabelCol("score_bucket");
     val pipeline = new Pipeline()
-      .setStages(Array(bucketizer, multiLr));
+      .setStages(Array(multiLr));
 
     val model = pipeline.fit(dataset)
     setModel(model)
-  }
-
-  def getBucketizer: CommentBucketizerModel = {
-    getModel.stages(0).asInstanceOf[CommentBucketizerModel]
   }
 
   def test(dataset: DataFrame) = {
