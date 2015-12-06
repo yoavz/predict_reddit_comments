@@ -2,7 +2,8 @@ package redditprediction
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.{Pipeline, PipelineModel}
-import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
+import org.apache.spark.ml.feature.{CountVectorizer, CountVectorizerModel,
+                                    Tokenizer, VectorAssembler,
                                     StopWordsRemover, OneHotEncoder}
 import org.apache.spark.ml.feature.{WordRemover, CommentTransformer, CommentBucketizer}
 
@@ -19,7 +20,7 @@ class SentimentFeaturePipeline extends FeaturePipeline {
 
   override val cv: CountVectorizer = new CountVectorizer()
     .setInputCol("words")
-    .setOutputCol("features");
+    .setOutputCol("words_features");
 
   override val processor: CommentTransformer = new CommentTransformer()
     .setWordsCol("words")
@@ -38,17 +39,28 @@ class SentimentFeaturePipeline extends FeaturePipeline {
     .setScoreCol("score_double")
     .setScoreBucketCol("score_bucket")
 
+  override val hourEncoder: OneHotEncoder = new OneHotEncoder()
+    .setInputCol("hour")
+    .setOutputCol("hour_encoded")
+
+  override val assembler = new VectorAssembler()
+    .setInputCols(Array("words_features", "chars_count", "avg_word_length",
+      "link_count", "words_count", "hour_encoded", "sentiment")) 
+    .setOutputCol("features")
+
   override def getPipeline: Pipeline = {
     new Pipeline().setStages(Array(tokenizer, remover, cv, 
-                                   processor, bucketizer))
+                                   processor, bucketizer, 
+                                   hourEncoder, assembler))
   }
 
-  // val hourEncoder: OneHotEncoder = new OneHotEncoder()
-  //   .setInputCol("hour")
-  //   .setOutputCol("hour_encoded")
+  override def fit(dataset: DataFrame): FeaturePipelineModel = {
+    new SentimentFeaturePipelineModel(getPipeline.fit(dataset))
+  }
+}
 
-  // val assembler = new VectorAssembler()
-  //   .setInputCols(Array("words_features", "chars_count", "avg_word_length",
-  //     "link_count", "words_count", "hour_encoded", "sentiment")) 
-    // .setOutputCol("features")
+class SentimentFeaturePipelineModel(modelc: PipelineModel) extends FeaturePipelineModel(modelc) {
+  override  def getCountVectorizerModel = {
+    model.stages(2).asInstanceOf[CountVectorizerModel]; 
+  }
 }

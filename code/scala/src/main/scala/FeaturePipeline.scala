@@ -4,7 +4,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     StopWordsRemover, OneHotEncoder, 
-                                    CountVectorizerModel}
+                                    CountVectorizerModel, RegexTokenizer}
 import org.apache.spark.ml.feature.{CommentTransformer, CommentBucketizer}
 
 class FeaturePipeline {
@@ -62,4 +62,21 @@ class FeaturePipeline {
 class FeaturePipelineModel(modelc: PipelineModel) {
   val model: PipelineModel = modelc
   def transform(dataset: DataFrame): DataFrame = { model.transform(dataset) };
+
+  def getCountVectorizerModel = {
+    model.stages(2).asInstanceOf[CountVectorizerModel]; 
+  }
+
+  def explainWeights(weights: Array[Double], top: Int) = {
+    println(s"Displaying top ${top} features");
+    weights.zipWithIndex.sortBy(-_._1).take(top).foreach{ t =>
+      val weight = t._1
+      val idx = t._2
+      if (idx < getCountVectorizerModel.vocabulary.length) {
+        println(s"[${weight}] Word ${getCountVectorizerModel.vocabulary(idx)}");
+      } else {
+        println(s"[${weight}] Feature ${idx}");
+      }
+    }
+  }
 }

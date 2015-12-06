@@ -14,9 +14,9 @@ lazy val root = (project in file(".")).
       "org.apache.spark" %% "spark-sql" % "1.5.2" % "provided",
       "org.apache.spark" %% "spark-mllib" % "1.5.2" % "provided",
 
-      "joda-time" % "joda-time" % "2.9.1"
+      "joda-time" % "joda-time" % "2.9.1",
 
-      // "org.scala-lang.modules" %% "scala-pickling" % "0.10.1"
+      "com.github.scopt" %% "scopt" % "3.3.0"
 
       // BigQuery Connector
       // "com.google.code.gson" % "gson" % "2.5",

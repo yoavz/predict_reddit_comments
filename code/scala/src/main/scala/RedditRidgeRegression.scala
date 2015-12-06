@@ -37,5 +37,9 @@ class RedditRidgeRegression extends RedditRegression {
     println(s"Tried C: ${regs.deep.mkString(", ")}");
     val bestLr = model.stages(0).asInstanceOf[LinearRegressionModel]
     println(s"Best C: ${bestLr.getRegParam}")
+
+    if (bestLr.hasSummary) {
+      println(s"Training RMSE: ${bestLr.summary.rootMeanSquaredError}")
+    }
   }
 }
