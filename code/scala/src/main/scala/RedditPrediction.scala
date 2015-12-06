@@ -37,7 +37,7 @@ object RedditPrediction {
     parser.parse(args, Config()) match { 
       case Some(config) => {
         if (config.remote_file.length > 0) {
-          input_file = "s3://cs260-yoavz/" + config.remote_file;
+          input_file = "s3n://cs260-yoavz/" + config.remote_file + ".json"
         } else if (config.local_file.length > 0) {
           input_file = config.local_file
         } else {
@@ -62,8 +62,8 @@ object RedditPrediction {
     sc.hadoopConfiguration.set("fs.s3.awsSecretAccessKey", sys.env("AWS_SECRET_ACCESS_KEY"))
     val sqlContext = new SQLContext(sc);
 
+    println(s"Loading from ${input_file}")
     val df = sqlContext.read.json(input_file);
-    println(s"Loaded input file ${input_file}");
     println(s"${df.count()} total comments");
 
     // Filtering logic for removed and deleted comments
