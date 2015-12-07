@@ -1,11 +1,10 @@
-package redditprediction
+package redditprediction.pipeline
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     StopWordsRemover, OneHotEncoder, 
                                     CountVectorizerModel, RegexTokenizer}
-import org.apache.spark.ml.feature.{CommentTransformer, CommentBucketizer}
 
 class FeaturePipeline {
   // initialization

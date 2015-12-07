@@ -3,7 +3,6 @@ package redditprediction
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
 import org.apache.spark.ml.{Pipeline, PipelineModel}
-import org.apache.spark.ml.feature.{CommentBucketizerModel, CountVectorizerModel}
 import org.apache.spark.sql.{SQLContext, DataFrame, Row}
 import org.apache.spark.sql.types.{StructType,StructField,StringType};
 
@@ -12,6 +11,9 @@ import com.google.cloud.hadoop.util.HadoopCredentialConfiguration;
 import com.google.cloud.hadoop.io.bigquery.GsonBigQueryInputFormat
 import com.google.gson.JsonObject
 import org.apache.hadoop.io.{LongWritable, Text}
+
+import redditprediction.pipeline.{CommentBucketizerModel, SentimentFeaturePipeline, 
+                                  FeaturePipeline, FeaturePipelineModel}
 
 import scala.collection.JavaConversions._
 

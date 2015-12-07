@@ -1,4 +1,4 @@
-package org.apache.spark.ml.feature
+package redditprediction.pipeline
 
 import org.apache.spark.ml.{Estimator, Model}
 import org.apache.spark.ml.attribute._

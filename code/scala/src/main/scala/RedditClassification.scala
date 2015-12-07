@@ -7,8 +7,6 @@ import org.apache.spark.ml.feature.{CountVectorizerModel}
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 
-import org.apache.spark.ml.feature.{CommentBucketizer, CommentBucketizerModel}
-
 abstract class RedditClassification {
 
   var _model: Option[PipelineModel] = None

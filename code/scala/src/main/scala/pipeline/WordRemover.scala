@@ -1,4 +1,4 @@
-package org.apache.spark.ml.feature
+package redditprediction.pipeline
 
 import scala.io.Source
 
@@ -11,10 +11,11 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.types._
 
-class WordRemover(override val uid: String)
-  extends Transformer with HasInputCol with HasOutputCol {
+class WordRemover(override val uid: String) extends Transformer { 
 
   def this() = this(Identifiable.randomUID("wordRemover"))
+  val inputCol: Param[String] = new Param[String](this, "input", "");
+  val outputCol: Param[String] = new Param[String](this, "output", "");
 
   // Sentiment Map
   var sentimentMap: Map[String, Int] = Map()
@@ -42,7 +43,9 @@ class WordRemover(override val uid: String)
   }
 
   override def transformSchema(schema: StructType): StructType = {
-    SchemaUtils.appendColumn(schema, $(outputCol), new ArrayType(StringType, true))
+    val outputFields = schema.fields :+ 
+      StructField($(outputCol), new ArrayType(StringType, true), nullable = false)
+    StructType(outputFields)
   }
 
   override def copy(extra: ParamMap): CommentTransformer = defaultCopy(extra)

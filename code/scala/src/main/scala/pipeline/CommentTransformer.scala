@@ -1,4 +1,4 @@
-package org.apache.spark.ml.feature
+package redditprediction.pipeline
 
 import scala.io.Source
 
@@ -114,7 +114,7 @@ class CommentTransformer(override val uid: String)
     var numLinks = NumericAttribute.defaultAttr.withName($(linkCountCol));
     var scores = NumericAttribute.defaultAttr.withName($(scoreCol));
     var sentiment = NumericAttribute.defaultAttr.withName($(sentimentCol));
-    var hour = new NominalAttribute(name = Some($(hourCol)), numValues = Some(24))
+    var hour = NominalAttribute.defaultAttr.withName($(hourCol)).withNumValues(24)
 
     val outputFields = schema.fields :+ numWords.toStructField() :+
       numChars.toStructField() :+ avgWordLength.toStructField() :+
