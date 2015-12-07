@@ -1,0 +1,39 @@
+Loading from bigquery bucket: cs260-1128:15_09.askreddit
+Loaded 3949561 rows
+3949561 total comments
+3656583 total comments after filtering
+3656583 comments after limiting
+2073368 total comments after preprocessing
+Split into 1451854 training and 621514 test comments
+Learning using Vanilla Linear Regression
+Training RMSE: 142.06709794144632
+Testing RMSE: 146.21637610048884
++--------------------+--------------------+------------+------------------+------------------+
+|                body|               words|score_double|        prediction|            sq_err|
++--------------------+--------------------+------------+------------------+------------------+
+|Isn't it "Because...|              [want]|         2.0|19.715881208758013| 313.8524470028253|
+|This is going to ...|[fuck, fucking, b...|         1.0| 63.42480234943212| 3896.855948365666|
+|"Secret... Asian ...|              [like]|         2.0|20.273603556045103|333.92458692350425|
+|Kit Kat
+
+Put them...|              [best]|        25.0|19.154341967776286| 34.17171782970162|
+|At least our chil...|              [dumb]|        15.0|21.897843876513424|47.580250144753734|
+|all food tastes b...|            [better]|         1.0|18.935564774199047| 321.6844837694897|
+|I want to believe...|  [want, meaningful]|         6.0|12.347167866335015| 40.28653992343579|
+|I ate one of thos...|             [dirty]|         3.0|28.314898855894647| 640.8441040841761|
+|A girl invited yo...|[jesus, stop, bla...|         7.0|32.311841080600274| 640.6892988895637|
+|Is she dead in a ...|              [dead]|         0.0|24.386483649944424| 594.7005848090067|
++--------------------+--------------------+------------+------------------+------------------+
+only showing top 10 rows
+
+Displaying top 10 features
+[794.7458318436666] Word convivial
+[753.2851058544684] Word slickest
+[305.79800840535717] Word glum
+[300.03754219366806] Word cherishes
+[296.7174707638567] Word woeful
+[289.23376397806646] Word restful
+[262.6300536038718] Word exonerate
+[258.9908706333086] Word elation
+[223.84393930561592] Word misunderstands
+[206.56958987337495] Word resigns

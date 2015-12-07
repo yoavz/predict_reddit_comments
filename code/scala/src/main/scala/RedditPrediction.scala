@@ -68,7 +68,7 @@ object RedditPrediction {
           conf.set("fs.gs.project.id", projectId)
           conf.set("fs.gs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
 
-          conf.set(GSKeyFileKey, sys.env("GOOGLE_APPLICATION_CREDENTIALS"))
+          conf.set(GSKeyFileKey, "/root/data/cs260-gs-key.p12")
           conf.set(GSEmailKey, "account-2@cs260-1128.iam.gserviceaccount.com")
 
           val columns = "body author created_utc subreddit_id link_id parent_id score retrieved_on controversiality gilded id subreddit ups".split(" ")

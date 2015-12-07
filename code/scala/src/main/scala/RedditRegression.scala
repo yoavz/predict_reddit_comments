@@ -26,7 +26,7 @@ class RedditRegression {
     val lr = new LinearRegression()
       .setFeaturesCol("features")
       .setLabelCol("score_double")
-      .setMaxIter(10000);
+      .setMaxIter(100);
     
     val pipeline = new Pipeline()
       .setStages(Array(lr));

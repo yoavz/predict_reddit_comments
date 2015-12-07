@@ -19,7 +19,7 @@ lazy val root = (project in file(".")).
 
       // BigQuery Connector
       "com.google.cloud.bigdataoss" % "bigquery-connector-parent" % "0.7.3",
-      "com.google.cloud.bigdataoss" % "bigquery-connector" % "0.7.3-hadoop2"
+      "com.google.cloud.bigdataoss" % "bigquery-connector" % "0.7.3-hadoop1"
       // "com.google.apis" % "google-api-services-bigquery" % "v2-rev248-1.21.0",
       // "com.google.code.gson" % "gson" % "2.5",
       // "com.google.cloud.bigdataoss" %% "bigquery-connector" % "0.7.3-hadoop2" from "https://oss.sonatype.org/content/repositories/staging/com/google/cloud/bigdataoss/bigquery-connector/0.7.3-hadoop2/bigquery-connector-0.7.3-hadoop2.jar"
