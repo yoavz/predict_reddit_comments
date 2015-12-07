@@ -2,15 +2,16 @@ package redditprediction
 
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
-import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{CommentBucketizerModel, CountVectorizerModel}
+import org.apache.spark.sql.{SQLContext, DataFrame, Row}
+import org.apache.spark.sql.types.{StructType,StructField,StringType};
 
 import com.google.cloud.hadoop.io.bigquery.BigQueryConfiguration
 import com.google.cloud.hadoop.util.HadoopCredentialConfiguration;
 import com.google.cloud.hadoop.io.bigquery.GsonBigQueryInputFormat
 import com.google.gson.JsonObject
-import org.apache.hadoop.io.LongWritable
+import org.apache.hadoop.io.{LongWritable, Text}
 
 import scala.collection.JavaConversions._
 
@@ -50,6 +51,7 @@ object RedditPrediction {
 
         // GCS BigQuery configuration
         if (config.gs_file.length > 0) { 
+
           val fullTableId = "cs260-1128:15_09." + config.gs_file;
           val projectId = "cs260-1128";
           val bucket = "15_09";
@@ -69,17 +71,24 @@ object RedditPrediction {
           conf.set(GSKeyFileKey, sys.env("GOOGLE_APPLICATION_CREDENTIALS"))
           conf.set(GSEmailKey, "account-2@cs260-1128.iam.gserviceaccount.com")
 
-          // val sqlContext = new SQLContext(sc);
+          val columns = "body author created_utc subreddit_id link_id parent_id score retrieved_on controversiality gilded id subreddit ups".split(" ")
+          val sqlContext = new SQLContext(sc);
+          val schema =
+            StructType(columns.map(fieldName => StructField(fieldName, StringType, true)))
 
-          val gs = sc.newAPIHadoopRDD(
+          println(s"Loading from bigquery bucket: ${fullTableId}")
+          val RDD = sc.newAPIHadoopRDD(
             conf, 
             classOf[GsonBigQueryInputFormat],
             classOf[LongWritable],
             classOf[JsonObject])
 
-          println(s"gs successfully loaded ${gs.count()} rows")
-          return
-            
+          val rowRDD = RDD.map({ pair: (LongWritable, JsonObject) => 
+            Row.fromSeq(columns.map({ k: String => pair._2.get(k).getAsString }))
+          })
+          df = sqlContext.createDataFrame(rowRDD, schema)
+          println(s"Loaded ${df.count()} rows")
+
         } else if (config.s3_bucket_file.length > 0) {
           val conf = sc.hadoopConfiguration;
           conf.set("fs.s3.awsAccessKeyId", sys.env("AWS_ACCESS_KEY_ID"))
@@ -120,9 +129,9 @@ object RedditPrediction {
 
     // Limiting
     val limited = if (to_limit) { 
-      filtered.limit(5000)
+      filtered.limit(5000).cache
     } else {
-      filtered
+      filtered.cache
     }
     println(s"${limited.count()} comments after limiting");
 
