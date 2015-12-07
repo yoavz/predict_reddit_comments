@@ -2,13 +2,19 @@ package redditprediction
 
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{CommentBucketizerModel, CountVectorizerModel}
 
-// import scopt._
+import com.google.cloud.hadoop.io.bigquery.BigQueryConfiguration
+import com.google.cloud.hadoop.util.HadoopCredentialConfiguration;
+import com.google.cloud.hadoop.io.bigquery.GsonBigQueryInputFormat
+import com.google.gson.JsonObject
+import org.apache.hadoop.io.LongWritable
 
-case class Config(local_file: String = "", remote_file: String = "", sentiment: Boolean = false, limited: Boolean = true, mode: String = "linear");
+import scala.collection.JavaConversions._
+
+case class Config(local_file: String = "", s3_bucket_file: String = "", gs_file: String = "", sentiment: Boolean = false, limited: Boolean = true, mode: String = "linear");
 
 object RedditPrediction {
 
@@ -19,8 +25,10 @@ object RedditPrediction {
       head("predict reddit", "1.0")
       opt[String]('l', "local_file") action { (x, c) =>
         c.copy(local_file = x) } text("specify the full path of a local json file")
-      opt[String]('r', "remote_file") action { (x, c) =>
-        c.copy(remote_file = x) } text("subreddit name for s3 bucket access")
+      opt[String]('a', "s3_file") action { (x, c) =>
+        c.copy(s3_bucket_file = x) } text("subreddit name for s3 bucket access")
+      opt[String]('g', "gs_file") action { (x, c) =>
+        c.copy(gs_file = x) } text("subreddit name for s3 bucket access")
       opt[String]('m', "mode") action { (x, c) =>
         c.copy(mode = x) } text("algorithm mode")
       opt[Unit]('s', "sentiment") action { (_, c) =>
@@ -30,16 +38,62 @@ object RedditPrediction {
       help("help") text("prints this usage text")
     }
 
-    var input_file: String = ""
+    val sc = new SparkContext()
+    var df: DataFrame = null;
+
     var mode : String = ""
     var sentiment: Boolean = false
     var to_limit: Boolean = true
+
     parser.parse(args, Config()) match { 
       case Some(config) => {
-        if (config.remote_file.length > 0) {
-          input_file = "s3n://cs260-yoavz/" + config.remote_file + ".json"
+
+        // GCS BigQuery configuration
+        if (config.gs_file.length > 0) { 
+          val fullTableId = "cs260-1128:15_09." + config.gs_file;
+          val projectId = "cs260-1128";
+          val bucket = "15_09";
+
+          val GSAccountEnableKey = "google.cloud.auth.service.account.enable";
+          val GSKeyFileKey = "google.cloud.auth.service.account.keyfile";
+          val GSEmailKey = "google.cloud.auth.service.account.email";
+
+          val conf = sc.hadoopConfiguration;
+          conf.set(BigQueryConfiguration.PROJECT_ID_KEY, projectId)
+          conf.set(BigQueryConfiguration.GCS_BUCKET_KEY, bucket)
+          BigQueryConfiguration.configureBigQueryInput(conf, fullTableId)
+          conf.set("fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem")
+          conf.set("fs.gs.project.id", projectId)
+          conf.set("fs.gs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
+
+          conf.set(GSKeyFileKey, sys.env("GOOGLE_APPLICATION_CREDENTIALS"))
+          conf.set(GSEmailKey, "account-2@cs260-1128.iam.gserviceaccount.com")
+
+          // val sqlContext = new SQLContext(sc);
+
+          val gs = sc.newAPIHadoopRDD(
+            conf, 
+            classOf[GsonBigQueryInputFormat],
+            classOf[LongWritable],
+            classOf[JsonObject])
+
+          println(s"gs successfully loaded ${gs.count()} rows")
+          return
+            
+        } else if (config.s3_bucket_file.length > 0) {
+          val conf = sc.hadoopConfiguration;
+          conf.set("fs.s3.awsAccessKeyId", sys.env("AWS_ACCESS_KEY_ID"))
+          conf.set("fs.s3.awsSecretAccessKey", sys.env("AWS_SECRET_ACCESS_KEY"))
+
+          val sqlContext = new SQLContext(sc);
+          val s3Path = "s3n://cs260-yoavz/" + config.s3_bucket_file + ".json"
+          println(s"Loading from amazon s3 path: ${s3Path}")
+          df = sqlContext.read.json(s3Path).cache
+
         } else if (config.local_file.length > 0) {
-          input_file = config.local_file
+          val sqlContext = new SQLContext(sc);
+          println(s"Loading from local path: ${config.local_file}")
+          df = sqlContext.read.json(config.local_file);
         } else {
           println("Must specify a local or remote file!");
           return
@@ -56,14 +110,6 @@ object RedditPrediction {
       }
     }
 
-    val conf = new SparkConf().setAppName("Predict Reddit Comments")
-    val sc = new SparkContext()
-    sc.hadoopConfiguration.set("fs.s3.awsAccessKeyId", sys.env("AWS_ACCESS_KEY_ID"))
-    sc.hadoopConfiguration.set("fs.s3.awsSecretAccessKey", sys.env("AWS_SECRET_ACCESS_KEY"))
-    val sqlContext = new SQLContext(sc);
-
-    println(s"Loading from ${input_file}")
-    val df = sqlContext.read.json(input_file);
     println(s"${df.count()} total comments");
 
     // Filtering logic for removed and deleted comments
