@@ -21,16 +21,6 @@ class FeaturePipeline {
     .setOutputCol("words_features");
 
   val processor: CommentTransformer = new CommentTransformer()
-    .setWordsCol("words")
-    .setBodyCol("body")
-    .setScoreCol("score_double")
-    .setTimeCol("created_utc")
-    .setWordsCountCol("words_count")
-    .setCharsCountCol("chars_count")
-    .setAvgWordLengthCol("avg_word_length")
-    .setLinkCountCol("link_count")
-    .setHourCol("hour")
-    .setSentimentCol("sentiment")
     .loadSentimentMap("/root/data/AFINN-111.txt")
 
   val hourEncoder: OneHotEncoder = new OneHotEncoder()
@@ -71,7 +61,8 @@ class FeaturePipelineModel(modelc: PipelineModel) {
     weights.zipWithIndex.sortBy(-_._1).take(top).foreach{ t =>
       val weight = t._1
       val idx = t._2
-      if (idx < getCountVectorizerModel.vocabulary.length) {
+      if (getCountVectorizerModel != null &&
+          idx < getCountVectorizerModel.vocabulary.length) {
         println(s"[${weight}] Word ${getCountVectorizerModel.vocabulary(idx)}");
       } else {
         println(s"[${weight}] Feature ${idx}");

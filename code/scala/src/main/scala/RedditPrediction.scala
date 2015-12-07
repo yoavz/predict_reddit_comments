@@ -13,14 +13,14 @@ import com.google.gson.JsonObject
 import org.apache.hadoop.io.{LongWritable, Text}
 
 import redditprediction.pipeline.{CommentBucketizerModel, SentimentFeaturePipeline, 
-                                  FeaturePipeline, FeaturePipelineModel}
+                                  FeaturePipeline, FeaturePipelineModel, 
+                                  MetadataFeaturePipeline}
 
 import scala.collection.JavaConversions._
 
-case class Config(local_file: String = "", s3_bucket_file: String = "", gs_file: String = "", sentiment: Boolean = false, limited: Boolean = true, mode: String = "linear");
+case class Config(local_file: String = "", s3_bucket_file: String = "", gs_file: String = "", pipeline: String = "bag", limited: Boolean = true, mode: String = "linear");
 
 object RedditPrediction {
-
 
   def main(args: Array[String]) {
 
@@ -33,9 +33,10 @@ object RedditPrediction {
       opt[String]('g', "gs_file") action { (x, c) =>
         c.copy(gs_file = x) } text("subreddit name for s3 bucket access")
       opt[String]('m', "mode") action { (x, c) =>
-        c.copy(mode = x) } text("algorithm mode")
-      opt[Unit]('s', "sentiment") action { (_, c) =>
-        c.copy(sentiment = true) } text("only use sentiment words")
+        c.copy(mode = x) } text("""algorithm mode: [linear (regression), 
+                                   |ridge (regression), logistic""".stripMargin)
+      opt[String]('p', "pipeline") action { (x, c) =>
+        c.copy(pipeline = x) } text("features pipeline mode: [bag (of words), sentiment, metadata]")
       opt[Unit]('u', "unlimited") action { (_, c) =>
         c.copy(limited = false) } text("remove limit (for cluster jobs")
       help("help") text("prints this usage text")
@@ -45,7 +46,7 @@ object RedditPrediction {
     var df: DataFrame = null;
 
     var mode : String = ""
-    var sentiment: Boolean = false
+    var pipeline_mode: String = ""
     var to_limit: Boolean = true
 
     parser.parse(args, Config()) match { 
@@ -111,7 +112,7 @@ object RedditPrediction {
         }
 
         mode = config.mode;
-        sentiment = config.sentiment;
+        pipeline_mode = config.pipeline
         to_limit = config.limited;
       }
 
@@ -138,10 +139,17 @@ object RedditPrediction {
     println(s"${limited.count()} comments after limiting");
 
     // Preprocessing
-    var featurePipeline: FeaturePipeline = new FeaturePipeline();
-    if (sentiment) {
+    var featurePipeline: FeaturePipeline = null;
+    if (pipeline_mode == "sentiment") {
+      println("Using sentiment feature pipeline")
       featurePipeline = new SentimentFeaturePipeline();
-    } 
+    } else if (pipeline_mode == "metadata") {
+      println("Using metadata feature pipeline")
+      featurePipeline = new MetadataFeaturePipeline();
+    } else {
+      println("Using bag of words feature pipeline")
+      featurePipeline = new FeaturePipeline();
+    }
     val featurePipelineModel: FeaturePipelineModel = featurePipeline.fit(limited)
     val featured = featurePipelineModel.transform(limited) 
     println(s"${featured.count()} total comments after preprocessing");
@@ -151,9 +159,10 @@ object RedditPrediction {
     val Array(train, test) = featured.randomSplit(Array(train_to_test, 1-train_to_test));
     println(s"Split into ${train.count()} training and ${test.count()} test comments");
 
+    val regs: Array[Double] = (-5 to 5).toArray.map(x => scala.math.pow(2, x))
     // Do the training
     if (mode == "logistic") {
-      val regs: Array[Double] = (-5 to 5).toArray.map(x => scala.math.pow(2, x))
+      println("Learning using Logistic Regression");
       val logistic = new RedditLogisticRegression();
       logistic.trainWithRegularization(train, regs)
       logistic.test(test)
@@ -163,7 +172,6 @@ object RedditPrediction {
         featurePipelineModel.model.stages(4).asInstanceOf[CommentBucketizerModel]
       bucketizer.explainBucketDistribution(featured, "score_bucket")
     } else if (mode == "ridge") {
-      val regs: Array[Double] = (-5 to 8).toArray.map(x => scala.math.pow(2, x))
       println("Learning using Ridge Regression");
       val regr = new RedditRidgeRegression();
       regr.train(train, regs);
