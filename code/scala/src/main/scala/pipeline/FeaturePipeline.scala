@@ -4,14 +4,18 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     StopWordsRemover, OneHotEncoder, 
-                                    CountVectorizerModel, RegexTokenizer,
-                                    StandardScaler}
+                                    CountVectorizerModel}
+import org.apache.spark.ml.feature.StandardScaler
 
-class FeaturePipeline {
+class FeaturePipeline(vocabSize: Int = -1, scale: Boolean = false) {
   // initialization
   val tokenizer: Tokenizer = new Tokenizer()
     .setInputCol("body")
-    .setOutputCol("words");
+    .setOutputCol("words_raw");
+
+  val tokenCleaner: WordCleaner = new WordCleaner()
+    .setInputCol("words_raw")
+    .setOutputCol("words")
 
   val stopwords: StopWordsRemover = new StopWordsRemover()
     .setInputCol("words")
@@ -19,7 +23,12 @@ class FeaturePipeline {
 
   val cv: CountVectorizer = new CountVectorizer()
     .setInputCol("filtered")
-    .setOutputCol("words_features");
+    .setOutputCol("words_features")
+    .setVocabSize( 
+      if (vocabSize < 0) { 
+        scala.math.pow(2, 18).toInt 
+      } else { vocabSize }
+    );
 
   val processor: CommentTransformer = new CommentTransformer()
     .loadSentimentMap("/root/data/AFINN-111.txt")
@@ -39,9 +48,9 @@ class FeaturePipeline {
     .setOutputCol("features")
 
   def getPipeline: Pipeline = {
-    new Pipeline().setStages(Array(tokenizer, stopwords, cv, 
+    new Pipeline().setStages(Array(tokenizer, tokenCleaner, stopwords, cv, 
                                    processor, bucketizer, 
-                                   hourEncoder, assembler))
+                                   hourEncoder, assembler, scaler))
   }
 
   def fit(dataset: DataFrame): FeaturePipelineModel = {
@@ -54,7 +63,7 @@ class FeaturePipelineModel(modelc: PipelineModel) {
   def transform(dataset: DataFrame): DataFrame = { model.transform(dataset) };
 
   def getCountVectorizerModel = {
-    model.stages(2).asInstanceOf[CountVectorizerModel]; 
+    model.stages(3).asInstanceOf[CountVectorizerModel]; 
   }
 
   def explainWeights(weights: Array[Double], top: Int) = {

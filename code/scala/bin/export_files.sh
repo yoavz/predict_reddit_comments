@@ -1,5 +1,6 @@
 #!/bin/bash
 
+BASE_DIR="$HOME/school/cs260/project/code/scala"
 KEY_FILE="$HOME/keys/cs260.pem"
 CRED_FILE="$HOME/keys/cs260-gs-key.p12"
 AFINN_FILE="/root/data/AFINN-111.txt"

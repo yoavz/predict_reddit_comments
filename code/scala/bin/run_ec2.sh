@@ -11,7 +11,7 @@ KEY_NAME="cs260"
 KEY_FILE="$HOME/keys/cs260.pem"
 NUM_SLAVES=1
 REGION="us-west-1"
-INSTANCE_TYPE="m1.small"
+INSTANCE_TYPE="m1.large"
 
 OPTIONS="-k $KEY_NAME
  -i $KEY_FILE

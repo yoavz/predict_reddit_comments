@@ -1,0 +1,47 @@
+\documentclass[11pt, twocolumn]{article}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{natbib}
+\usepackage{url}
+\renewcommand{\thesubsection}{\alph{subsection}.}
+
+\begin{document}
+\title{Predicting Comment Karma by Subreddit}
+\author{Yoav Zimmerman (304125151) \\
+	    CS 260: Machine Learning Algorithms \\}
+\maketitle
+
+\section{Abstract}
+
+TODO: write after
+
+\section{Motivation}
+
+TODO: update [copied from proposal]
+
+Voting systems are a standard part of many online communities. Whether the measure is ``likes'' on a facebook status, “hearts” on a picture in Instagram, or “upvotes” on a submission from Reddit, these voting systems often define which online content receives the most attention. Understanding the dynamics of user behavior in voting systems has applications in the world of online advertising, voting algorithm design, and viral marketing. In this project, we plan on examining the popularity of online content through Reddit \textit{comment karma}. Reddit is a website that aggregates link submissions, and allows users to either “upvote” or “downvote” other users comments on submissions. These votes are aggregated into a single, dynamic karma score for each Reddit comment. By attempting to formulate a model for predicting Reddit \textit{comment karma} on a given subreddit, we hope to gain insights into why and how comments go viral on that subreddit. Furthermore, a prediction function on comment karma for a given subreddit could provide an interesting similarity measure between it and other subreddits.
+
+\section{Background}
+
+TODO:
+
+\section{Data}
+	\subsection{Dataset}
+	The dataset used in this project was using the publicly available dataset of 1.7 billion reddit comments (include reference). The strength of the dataset was in it's large size. The weakness was that the data associated each comment only consisted of basic features such as body text, author, time posted, and score of the comment. To collect more potentially important metadata such as the depth of a comment, a web crawler would be required to collect more data and augment this dataset. Since augmenting such a large dataset in this way is unpractical, this project aimed to focus mainly on features from the body text.
+	
+	\subsection{Features}
+	There were two broad categories of features used
+	
+
+	\subsection{Implementation}
+	TODO:
+
+\section{Model}
+First, we will use Google BigQuery to divide the data into subreddit comment sets. We plan on representing each reddit comment with the following types of features:
+
+
+\bibliographystyle{acm}
+\bibliography{proposal}
+
+\end{document}
