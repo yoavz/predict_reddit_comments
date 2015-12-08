@@ -7,14 +7,10 @@ import org.apache.spark.ml.feature.{CountVectorizer, CountVectorizerModel,
                                     StopWordsRemover, OneHotEncoder}
 
 class SentimentFeaturePipeline extends FeaturePipeline {
-  // initialization
-  override val tokenizer: Tokenizer = new Tokenizer()
-    .setInputCol("body")
-    .setOutputCol("raw_words");
 
   val remover: WordRemover = new WordRemover()
-    .setInputCol("raw_words")
-    .setOutputCol("words")
+    .setInputCol("words")
+    .setOutputCol("filtered")
     .loadSentimentMap("/root/data/AFINN-111.txt")
 
   override val assembler = new VectorAssembler()
@@ -34,7 +30,7 @@ class SentimentFeaturePipeline extends FeaturePipeline {
 }
 
 class SentimentFeaturePipelineModel(modelc: PipelineModel) extends FeaturePipelineModel(modelc) {
-  override  def getCountVectorizerModel = {
+  override def getCountVectorizerModel = {
     model.stages(2).asInstanceOf[CountVectorizerModel]; 
   }
 }

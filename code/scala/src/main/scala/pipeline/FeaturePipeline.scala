@@ -4,7 +4,8 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     StopWordsRemover, OneHotEncoder, 
-                                    CountVectorizerModel, RegexTokenizer}
+                                    CountVectorizerModel, RegexTokenizer,
+                                    StandardScaler}
 
 class FeaturePipeline {
   // initialization
@@ -33,9 +34,9 @@ class FeaturePipeline {
 
   val assembler = new VectorAssembler()
     .setInputCols(Array("words_features", "chars_count", "avg_word_length",
-      "link_count", "words_count", "hour_encoded", "sentiment")) 
+      "link_count", "words_count", "hour_encoded", "sentiment", "question_mark",
+      "excl_mark")) 
     .setOutputCol("features")
-
 
   def getPipeline: Pipeline = {
     new Pipeline().setStages(Array(tokenizer, stopwords, cv, 

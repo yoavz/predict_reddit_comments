@@ -25,8 +25,7 @@ class RedditRegression {
   def train(dataset: DataFrame) = {
     val lr = new LinearRegression()
       .setFeaturesCol("features")
-      .setLabelCol("score_double")
-      .setMaxIter(100);
+      .setLabelCol("score_double");
     
     val pipeline = new Pipeline()
       .setStages(Array(lr));

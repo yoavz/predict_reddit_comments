@@ -14,7 +14,7 @@ import org.apache.hadoop.io.{LongWritable, Text}
 
 import redditprediction.pipeline.{CommentBucketizerModel, SentimentFeaturePipeline, 
                                   FeaturePipeline, FeaturePipelineModel, 
-                                  MetadataFeaturePipeline}
+                                  MetadataFeaturePipeline, TfidfFeaturePipeline}
 
 import scala.collection.JavaConversions._
 
@@ -34,9 +34,12 @@ object RedditPrediction {
         c.copy(gs_file = x) } text("subreddit name for s3 bucket access")
       opt[String]('m', "mode") action { (x, c) =>
         c.copy(mode = x) } text("""algorithm mode: [linear (regression), 
-                                   |ridge (regression), logistic""".stripMargin)
+                                   |ridge (regression), logistic, 
+                                   |forest (random forest regression)""".stripMargin)
       opt[String]('p', "pipeline") action { (x, c) =>
-        c.copy(pipeline = x) } text("features pipeline mode: [bag (of words), sentiment, metadata]")
+        c.copy(pipeline = x) } text("""features pipeline mode: 
+                                       |[bag (of words), sentiment, 
+                                       |metadata, tfidf]""".stripMargin)
       opt[Unit]('u', "unlimited") action { (_, c) =>
         c.copy(limited = false) } text("remove limit (for cluster jobs")
       help("help") text("prints this usage text")
@@ -52,8 +55,15 @@ object RedditPrediction {
     parser.parse(args, Config()) match { 
       case Some(config) => {
 
+        mode = config.mode;
+        pipeline_mode = config.pipeline
+        to_limit = config.limited;
+
         // GCS BigQuery configuration
         if (config.gs_file.length > 0) { 
+
+          // if using GCS, we probably don't want to limit
+          to_limit = false;
 
           val fullTableId = "cs260-1128:15_09." + config.gs_file;
           val projectId = "cs260-1128";
@@ -111,9 +121,6 @@ object RedditPrediction {
           return
         }
 
-        mode = config.mode;
-        pipeline_mode = config.pipeline
-        to_limit = config.limited;
       }
 
       case None => {
@@ -146,6 +153,9 @@ object RedditPrediction {
     } else if (pipeline_mode == "metadata") {
       println("Using metadata feature pipeline")
       featurePipeline = new MetadataFeaturePipeline();
+    } else if (pipeline_mode == "tfidf") {
+      println("Using tfidf feature pipeline")
+      featurePipeline = new TfidfFeaturePipeline();
     } else {
       println("Using bag of words feature pipeline")
       featurePipeline = new FeaturePipeline();
@@ -153,6 +163,7 @@ object RedditPrediction {
     val featurePipelineModel: FeaturePipelineModel = featurePipeline.fit(limited)
     val featured = featurePipelineModel.transform(limited) 
     println(s"${featured.count()} total comments after preprocessing");
+    // featured.select("body", "features").take(10).foreach(println)
 
     // Split Train/Test
     val train_to_test = 0.70;
@@ -178,6 +189,11 @@ object RedditPrediction {
       regr.test(test);
       featurePipelineModel.explainWeights(
         regr.getRegressionModel.weights.toArray, 10)
+    } else if (mode == "forest") {
+      println("Learning using Random Forest Regression");
+      val regr = new RedditRandomForestRegression();
+      regr.train(train);
+      regr.test(test);
     } else {
       println("Learning using Vanilla Linear Regression");
       val regr = new RedditRegression();
