@@ -15,7 +15,8 @@ import org.apache.hadoop.io.{LongWritable, Text}
 import redditprediction.pipeline.{CommentBucketizerModel,
                                   SentimentFeaturePipeline, FeaturePipeline,
                                   FeaturePipelineModel,
-                                  MetadataFeaturePipeline, TfidfFeaturePipeline}
+                                  MetadataFeaturePipeline, TfidfFeaturePipeline,
+                                  PCAFeaturePipeline}
 
 import scala.collection.JavaConversions._
 
@@ -40,7 +41,7 @@ object RedditPrediction {
       opt[String]('p', "pipeline") action { (x, c) =>
         c.copy(pipeline = x) } text("""features pipeline mode: 
                                        |[bag (of words), sentiment, 
-                                       |metadata, tfidf]""".stripMargin)
+                                       |metadata, tfidf, pca]""".stripMargin)
       opt[Int]('l', "limit") action { (x, c) =>
         c.copy(limit = x) } text("Limit comments to a certain amount")
       opt[Double]('r', "reg_param") action { (x, c) =>
@@ -161,10 +162,14 @@ object RedditPrediction {
     } else if (pipeline_mode == "tfidf") {
       println("Using tfidf feature pipeline")
       featurePipeline = new TfidfFeaturePipeline(buckets);
+    } else if (pipeline_mode == "pca") {
+      println(s"Using pca feature pipeline, using k = ${buckets}")
+      featurePipeline = new PCAFeaturePipeline(buckets);
     } else {
       println("Using bag of words feature pipeline")
       featurePipeline = new FeaturePipeline(buckets);
     }
+
     val featurePipelineModel: FeaturePipelineModel = featurePipeline.fit(limited)
     val featured = featurePipelineModel.transform(limited) 
     println(s"${featured.count()} total comments after preprocessing");
@@ -187,6 +192,15 @@ object RedditPrediction {
       val bucketizer: CommentBucketizerModel = 
         featurePipelineModel.model.stages(4).asInstanceOf[CommentBucketizerModel]
       bucketizer.explainBucketDistribution(featured, "score_bucket")
+    } else if (mode == "reg") {
+      println("Learning using Linear Regression (reg search)");
+      val regr = new RedditRidgeRegression();
+      var history: Seq[(Double, Double, Double)] = regs.map{ reg =>
+        val train_rmse = regr.train(train, reg)
+        val test_rmse = regr.test(test)
+        (reg, train_rmse, test_rmse)
+      }
+      history.foreach(println)
     } else if (mode == "ridge") {
       println("Learning using Ridge Regression");
       val regr = new RedditRidgeRegression();

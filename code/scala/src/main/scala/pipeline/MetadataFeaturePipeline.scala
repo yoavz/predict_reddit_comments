@@ -14,7 +14,7 @@ class MetadataFeaturePipeline extends FeaturePipeline {
 
 
   override def getPipeline: Pipeline = {
-    new Pipeline().setStages(Array(tokenizer, processor, bucketizer, 
+    new Pipeline().setStages(Array(tokenizer, tokenCleaner, processor, bucketizer, 
                                    hourEncoder, assembler))
   }
 

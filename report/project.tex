@@ -24,21 +24,36 @@ Voting systems are a standard part of many online communities. Whether the measu
 
 \section{Background}
 
-TODO:
+Although there has some previous academic research on the subject of on the popularity of online content, there has been very little work exploring the prediction of the popularity of user-generated text, in particular. Szabo (http://www.hpl.hp.com/research/idl/papers/predictions/predictions.pdf) was able to forecast the long-term (30 day) popularity of Digg content with relative success using short-term (2 hour) user access and popularity data. There have been several student projects of specifically attempting to predict popularity of user-submitted comments of websites such as HackerNews and Reddit. Lamberson et. Al (TODO: reference) is a project that uses a large variety of features to attempt to predict scores of Reddit comments by using a prediction model. Lakkaraju is another student project that attempts predicting the score of top-level reddit submissions (note the difference from \textit{comments}). 
 
 \section{Data}
 	\subsection{Dataset}
 	The dataset used in this project was using the publicly available dataset of 1.7 billion reddit comments (include reference). The strength of the dataset was in it's large size. The weakness was that the data associated each comment only consisted of basic features such as body text, author, time posted, and score of the comment. To collect more potentially important metadata such as the depth of a comment, a web crawler would be required to collect more data and augment this dataset. Since augmenting such a large dataset in this way is unpractical, this project aimed to focus mainly on features from the body text.
 	
 	\subsection{Features}
-	There were two broad categories of features used
-	
+	The were N features extracted from each comment, most of which were extracted from the text of the comment itself. The main features are described below:
+	\begin{enumerate}
+		\item Bag of Words
+		\item Counts (character count, word count)
+		\item Average token length
+		\item hour of time posted
+		\item sentiment analysis (using AFINN-111.txt)
+		\item number of punctuations (?, !)
+	\end{enumerate}
+
+\section{Methods}
 
 	\subsection{Implementation}
 	TODO:
 
-\section{Model}
+\section{Implementation}
+
+\section{Results and Evaluation}
+
 First, we will use Google BigQuery to divide the data into subreddit comment sets. We plan on representing each reddit comment with the following types of features:
+
+\section{Future Work}
+
 
 
 \bibliographystyle{acm}

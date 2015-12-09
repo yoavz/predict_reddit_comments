@@ -63,7 +63,13 @@ class CommentTransformer(override val uid: String)
     }
     df = df.withColumn(charsCountCol, countChars(col(wordsCol)));
     val avgWordLength = udf { terms: Seq[String] =>
-      terms.foldLeft(0)((z: Int, i: String) => z + i.length()).toDouble / terms.length;
+      terms.foldLeft(0){(z: Int, i: String) => 
+        if (terms.length > 0) {
+          z + i.length()).toDouble / terms.length;
+        } else {
+          0.0
+        }
+      }
     }
     df = df.withColumn(avgWordLengthCol, avgWordLength(col(wordsCol)));
 

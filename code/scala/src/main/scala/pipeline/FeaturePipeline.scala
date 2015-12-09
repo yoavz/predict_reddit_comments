@@ -7,7 +7,7 @@ import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     CountVectorizerModel}
 import org.apache.spark.ml.feature.StandardScaler
 
-class FeaturePipeline(vocabSize: Int = -1, scale: Boolean = false) {
+class FeaturePipeline(vocabSize: Int = -1) {
   // initialization
   val tokenizer: Tokenizer = new Tokenizer()
     .setInputCol("body")
@@ -50,7 +50,7 @@ class FeaturePipeline(vocabSize: Int = -1, scale: Boolean = false) {
   def getPipeline: Pipeline = {
     new Pipeline().setStages(Array(tokenizer, tokenCleaner, stopwords, cv, 
                                    processor, bucketizer, 
-                                   hourEncoder, assembler, scaler))
+                                   hourEncoder, assembler))
   }
 
   def fit(dataset: DataFrame): FeaturePipelineModel = {

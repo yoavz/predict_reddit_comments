@@ -42,7 +42,7 @@ class RedditRegression {
     }
   }
 
-  def train(dataset: DataFrame, reg: Double) = {
+  def train(dataset: DataFrame, reg: Double): Double = {
     val lr = new LinearRegression()
       .setFeaturesCol("features")
       .setLabelCol("score_double")
@@ -57,9 +57,11 @@ class RedditRegression {
     if (lrModel.hasSummary) {
       println(s"Training RMSE: ${lrModel.summary.rootMeanSquaredError}")
     }
+
+    return lrModel.summary.rootMeanSquaredError
   }
 
-  def test(dataset: DataFrame) = {
+  def test(dataset: DataFrame): Double = {
     val predictions = getModel.transform(dataset);
     val error = udf { (score: Double, prediction: Double) =>
       scala.math.pow(score - prediction, 2)
@@ -71,6 +73,7 @@ class RedditRegression {
 
     println(s"Testing RMSE: ${rmse}");
     sqError.select("body", "words", "score_double", "prediction", "sq_err").show(10)
+    return rmse
   }
 
   def trainSGD(train: DataFrame, test: DataFrame) = {

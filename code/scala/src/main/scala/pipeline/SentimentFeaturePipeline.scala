@@ -19,7 +19,7 @@ class SentimentFeaturePipeline extends FeaturePipeline {
     .setOutputCol("features")
 
   override def getPipeline: Pipeline = {
-    new Pipeline().setStages(Array(tokenizer, remover, cv, 
+    new Pipeline().setStages(Array(tokenizer, tokenCleaner, remover, cv, 
                                    processor, bucketizer, 
                                    hourEncoder, assembler))
   }
@@ -31,6 +31,6 @@ class SentimentFeaturePipeline extends FeaturePipeline {
 
 class SentimentFeaturePipelineModel(modelc: PipelineModel) extends FeaturePipelineModel(modelc) {
   override def getCountVectorizerModel = {
-    model.stages(2).asInstanceOf[CountVectorizerModel]; 
+    model.stages(3).asInstanceOf[CountVectorizerModel]; 
   }
 }
