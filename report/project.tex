@@ -52,18 +52,25 @@ Although there has some previous academic research on the subject of on the popu
 	where $\lambda$ is a hyperparameter tuned by cross-validation testing.
 	
 	\subsection{Classification}
-	Another approach is to divide the comments into buckets based on their scores, and attempt to learn a multi-class classification model over these buckets. This model includes several complications that do not arise in the case of regression. First, the number of buckets introduces another ``hyperparameter'' into the algorithm- with a larger amount of buckets the model will have predict a finer granularity of scores, but too many buckets will result in a too difficult of a model to learn. In addition, the distribution of the dataset was heavily skewed towards lower scored comments in the range of 0-5. To address these complications, each comment was assigned to a bucket according to a log scale:
-	\begin{gather*}
-		bucket_n = \begin{cases}
+		Another approach to modeling this problem is to bucket the comments into $k$ score buckets and then run a classification algorithm on them. The two classification algorithms experimented with were Logistic Regression and Multinomial Naive Bayes. TODO: include why they are different? (http://www.cs.cmu.edu/~tom/mlbook/NBayesLogReg.pdf).  \\
+		This model includes several complications that do not arise in the case of regression. First, the number of buckets introduces another ``hyperparameter'' into the algorithm- with a larger amount of buckets the model will have predict a finer granularity of scores, but too many buckets will result in a too difficult of a model to learn. In addition, the distribution of the dataset was heavily skewed towards lower scored comments in the range of 0-5.
+		
+		\subsubsection{Bucket Classification}
+		To address these complications, one can assign each comment to a score bucket according to a log scale, which was one approach taken
+		\begin{gather*}
+			bucket_n = \begin{cases}
 				0 & score_n \le 0 \\
 				log_2(score_n) + 1 & score_n \geq 0
 				 \end{cases}
-	\end{gather*}
+		\end{gather*}
 	
-	After the comments are put into buckets, a One-vs-Rest model can be used to construct $k-1$ classifiers over $k$ buckets. The classification algorithms experimented with were Logistic Regression and Naive Bayes. TODO: more classification algorithms?
+	
+		\subsection{Special Case: Binary Classification}
+		Another approach is to cut the score of each comment at a threshold and divide the dataset into ``positive'' and ``negative'' comments. Note that this is a special case of bucket classification above, where number of buckets is equal to 2. As with above, Logistic Regression and Multinomial Naive Bayes models can be learned over the training data. The advantage to this model is that it is the least complex, and easiest to learn over. The large disadvantage to this model is that there is very little granularity and it is therefore not much use to map a comment to it's final score. Still, this model may give us some insight in feature analysis.
 
 \section{Implementation}
-	The feature processing and learning models were implemented by the 
+	The large size of the dataset proved to be the most challenging part of this project. The feature processing and learning models were implemented using the Apache Spark (TODO: reference) distributed computing framework. The Spark framework was a good fit due to it's capabilities for distributed computation and that it comes with a API for all many learning models. Spark also has a rich API for feature preprocessing that was used to construct bag-of-words and TF-IDF vectors. Spark also comes with helper scripts to set up clusters to run on Amazon's EC2 cloud computing services. A cluster of 4 machines on Amazon EC2 were used to train some models for large amounts of comments (> 1,000,000 million comments). 
+
 
 \section{Results and Evaluation}
 

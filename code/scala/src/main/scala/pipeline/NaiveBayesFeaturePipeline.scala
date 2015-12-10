@@ -19,5 +19,4 @@ class NaiveBayesFeaturePipeline(binary: Boolean = false) extends FeaturePipeline
 }
 
 class NaiveBayesFeaturePipelineModel(modelc: PipelineModel) extends FeaturePipelineModel(modelc) {
-  override def getCountVectorizerModel = null
 }

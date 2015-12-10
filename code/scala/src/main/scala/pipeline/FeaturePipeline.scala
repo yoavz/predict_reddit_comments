@@ -88,5 +88,17 @@ class FeaturePipelineModel(modelc: PipelineModel) {
         log.info(s"[${weight}] Feature ${idx}");
       }
     }
+
+    log.info(s"Displaying bottom ${top} features");
+    weights.zipWithIndex.sortBy(_._1).take(top).foreach{ t =>
+      val weight = t._1
+      val idx = t._2
+      if (getCountVectorizerModel != null &&
+          idx < getCountVectorizerModel.vocabulary.length) {
+        log.info(s"[${weight}] Word ${getCountVectorizerModel.vocabulary(idx)}");
+      } else {
+        log.info(s"[${weight}] Feature ${idx}");
+      }
+    }
   }
 }

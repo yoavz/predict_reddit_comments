@@ -1,0 +1,34 @@
+Loaded 602538 rows
+602538 total comments
+550192 total comments after filtering
+550192 comments after limiting
+Using binary bayes feature pipeline
+Split into 384664 training and 165528 test comments
+Learning using Binary Naive Bayes
+Actual (training) distribution:
+Median: 3.0
+< Median: 423301
+>= Median: 126891
+Displaying top 10 features
+[-2.7329907635170336] Word
+[-2.9211550541865456] Feature 235653
+[-4.587123994116226] Word like
+[-4.674205682232621] Word just
+[-4.842035648114049] Word people
+[-5.064250983683083] Word dont
+[-5.232205563679498] Word im
+[-5.333388812093412] Word time
+[-5.4208369116928505] Word think
+[-5.492262908823161] Word video
+Displaying bottom 10 features
+[-15.335363311344194] Word ella
+[-15.335363311344194] Word gtgreg
+[-15.335363311344194] Word gtoperator
+[-15.335363311344194] Word subtest
+[-15.335363311344194] Word cloudcreative
+[-15.335363311344194] Word cheezits
+[-15.335363311344194] Word motshekga
+[-15.335363311344194] Word werdum
+[-15.335363311344194] Word daffodil
+[-15.335363311344194] Word bolas
+Test accuracy: 0.7740986419216084

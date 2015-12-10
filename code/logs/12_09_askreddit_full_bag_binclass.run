@@ -1,0 +1,38 @@
+Loading from bigquery bucket: cs260-1128:15_09.askreddit
+Loaded 3949561 rows
+3949561 total comments
+3656583 total comments after filtering
+3656583 comments after limiting
+Using binary bayes feature pipeline
+
+
+
+Split into 2560128 training and 1096455 test comments
+Learning using Binary Naive Bayes
+Actual (training) distribution:
+Median: 3.0
+< Median: 3011861
+>= Median: 644722
+Displaying top 10 features
+[-2.847296809643126] Word
+[-2.9069182729810183] Feature 262144
+[-4.611846589353812] Word just
+[-4.635917844146649] Word like
+[-4.86921724243556] Word dont
+[-4.888664204120262] Word im
+[-4.934429156133955] Word people
+[-5.307756879564348] Word time
+[-5.435043351515574] Word think
+[-5.435665586328273] Word know
+Displaying bottom 10 features
+[-17.161352898731575] Word stemle
+[-17.161352898731575] Word fontcourier
+[-17.161352898731575] Word directiongtltmarqueegtltmarquee
+[-17.161352898731575] Word aleksey
+[-17.161352898731575] Word lipatov
+[-17.161352898731575] Word sanderscolonel
+[-17.161352898731575] Word weena
+[-17.161352898731575] Word advorange
+[-17.161352898731575] Word lt3lt3
+[-17.161352898731575] Word ucrossynz
+Test accuracy: 0.7932810740066851

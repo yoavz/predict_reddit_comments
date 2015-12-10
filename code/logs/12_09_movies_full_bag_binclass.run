@@ -1,0 +1,35 @@
+Loading from bigquery bucket: cs260-1128:15_09.movies
+Loaded 308777 rows
+308777 total comments
+288522 total comments after filtering
+288522 comments after limiting
+Using binary bayes feature pipeline
+Split into 201939 training and 86583 test comments
+Learning using Binary Naive Bayes
+Actual (training) distribution:
+Median: 4.0
+< Median: 219729
+>= Median: 68793
+Displaying top 10 features
+[-3.0215450051231567] Word
+[-3.096392704024602] Feature 126377
+[-4.253415921946216] Word movie
+[-4.558653030842828] Word like
+[-4.583810224002024] Word just
+[-5.118322454473892] Word think
+[-5.132083445856397] Word film
+[-5.157293893299487] Word really
+[-5.157528149342411] Word dont
+[-5.214158416391204] Word movies
+Displaying bottom 10 features
+[-14.615119147976037] Word pinkamina
+[-14.615119147976037] Word goodplease
+[-14.615119147976037] Word runnersup
+[-14.615119147976037] Word grossman
+[-14.615119147976037] Word sant
+[-14.615119147976037] Word mcluhan
+[-14.615119147976037] Word adler
+[-14.615119147976037] Word impersonating
+[-14.615119147976037] Word collier
+[-14.615119147976037] Word abides
+Test accuracy: 0.7832599933012254

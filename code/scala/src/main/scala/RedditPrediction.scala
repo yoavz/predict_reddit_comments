@@ -176,6 +176,22 @@ object RedditPrediction {
              ("metadata", new MetadataFeaturePipeline()))
       pipelines.map(t =>  (t._1, trainWithPipeline(t._2, limited))).foreach(log.info)
       return;
+    } else if (config.pipeline == "bin_class") { 
+      config = config.copy(mode = "binary")
+      val bayes_acc = trainWithPipeline(new NaiveBayesFeaturePipeline(true), limited)
+      config = config.copy(mode = "logistic")
+      val log_acc = trainWithPipeline(new NaiveBayesFeaturePipeline(true), limited)
+      log.info(s"Naive Bayes Test Accuracy: ${bayes_acc}")
+      log.info(s"Logistic Test Accuracy: ${log_acc}")
+      return
+    } else if (config.pipeline == "multi_class") {
+      config = config.copy(mode = "bayes")
+      val bayes_acc = trainWithPipeline(new NaiveBayesFeaturePipeline(false), limited)
+      config = config.copy(mode = "logistic")
+      val log_acc = trainWithPipeline(new FeaturePipeline(config.buckets), limited)
+      log.info(s"Naive Bayes Test Accuracy: ${bayes_acc}")
+      log.info(s"Logistic Test Accuracy: ${log_acc}")
+      return
     } else {
       log.info("Using bag of words feature pipeline")
       featurePipeline = new FeaturePipeline(config.buckets);
@@ -212,7 +228,12 @@ object RedditPrediction {
         bucketizer.explainBucketDistribution(featured, "score_bucket", log)
       }
 
+      val nbModel: NaiveBayesModel =
+        bayes.getModel.stages(0).asInstanceOf[NaiveBayesModel]
+      featurePipelineModel.explainWeights(
+        getWeightsNB(nbModel).toArray, 10)
       log.info(s"Test accuracy: ${test_accu}")
+      return test_accu
     } else if (config.mode == "bayes") {
       log.info("Learning using Naive Bayes");
       val bayes = new RedditNaiveBayes(false);
@@ -226,8 +247,12 @@ object RedditPrediction {
         bucketizer.explainBucketDistribution(featured, "score_bucket", log)
       }
 
-      explainWeightsNB(featurePipelineModel, 10)
+      val nbModel: NaiveBayesModel =
+        bayes.getModel.stages(0).asInstanceOf[NaiveBayesModel]
+      featurePipelineModel.explainWeights(
+        getWeightsNB(nbModel).toArray, 10)
       log.info(s"Test accuracy: ${test_accu}")
+      return test_accu
     } else if (config.mode == "logistic") {
       log.info("Learning using Logistic Regression");
       val logistic = new RedditLogisticRegression();
@@ -241,8 +266,8 @@ object RedditPrediction {
         bucketizer.explainBucketDistribution(featured, "score_bucket", log)
       }
 
-      explainWeightsNB(featurePipelineModel, 10)
       log.info(s"Test accuracy: ${test_accu}")
+      return test_accu
     } else if (config.mode == "reg") {
       log.info("Learning using Linear Regression (reg search)");
       val regr = new RedditRidgeRegression();
@@ -289,15 +314,9 @@ object RedditPrediction {
     0.0
   }
 
-  def explainWeightsNB(model: NaiveBayesModel, top: Int) = {
-    log.info(s"Displaying top ${top} features");
-
-    log.info(s"Displaying top ${top} features");
-    val words: Int = model.theta.numCols;
-    (0 to words).map{ t =>
-      (t, model.theta.apply(0, t))
-    }.sortBy(-_._2)
-     .take(top)
-     .foreach(log.info)
+  def getWeightsNB(model: NaiveBayesModel) = {
+    (0 to model.theta.numCols).map{ t =>
+      model.theta.apply(0, t)
+    }
   }
 }
