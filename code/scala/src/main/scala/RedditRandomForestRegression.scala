@@ -7,7 +7,7 @@ import org.apache.spark.ml.regression.{RandomForestRegressor,
 
 class RedditRandomForestRegression extends RedditRegression {
 
-  override def train(dataset: DataFrame) = {
+  override def train(dataset: DataFrame): Double = {
     val forest = new RandomForestRegressor()
       .setFeaturesCol("features")
       .setLabelCol("score_double");
@@ -20,5 +20,7 @@ class RedditRandomForestRegression extends RedditRegression {
 
     val forestModel = model.stages(0).asInstanceOf[RandomForestRegressionModel]
     println(s"Random Forest Summary: ${forestModel.toString}")
+
+    return 0.0
   }
 }

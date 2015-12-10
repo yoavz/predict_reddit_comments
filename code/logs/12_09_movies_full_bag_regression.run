@@ -1,0 +1,40 @@
+Loaded 308777 rows
+308777 total comments
+288522 total comments after filtering
+288522 comments after limiting
+Using bag of words feature pipeline
+Split into 201939 training and 86583 test comments
+Learning using Ridge Regression
+Tried C: 0.03125, 0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0
+Best C: 32.0
+Training RMSE: 68.14829993737499
+Training RMSE: 32.0, Best Lambda: 68.14829993737499
+Displaying top 10 features
+[2747.179998678411] Word acapocalypse
+[1643.2582477047156] Word legality
+[1207.9833869775675] Word diedhttplisajakubnet20140811farewelltorobinwilliamsathankyounote
+[1045.2336253177577] Word cuselindelof
+[1035.4875040606985] Word messup
+[830.4911102439253] Word porky
+[784.2063924600712] Word accidentaly
+[770.7010653143874] Word charmless
+[711.6263306227956] Word looted
+[679.0670315993207] Word mingling
++--------------------+--------------------+------------+------------------+------------------+
+|                body|               words|score_double|        prediction|            sq_err|
++--------------------+--------------------+------------+------------------+------------------+
+|How else are you ...|[how, else, are, ...|         6.0| 39.17810438844478|1100.7866108105388|
+|I am a Snipes fan...|[i, am, a, snipes...|         1.0|18.622972170254698| 310.5691481135716|
+|    T4KEN confirmed?|  [t4ken, confirmed]|         1.0|3.6006060839609084| 6.763152003934492|
+|A sequel to a thi...|[a, sequel, to, a...|       -16.0|13.455745107968978| 867.6409198656385|
+|Can you explain w...|[can, you, explai...|         2.0|-1.167438190879034|10.032664693039049|
+|Please be a prequ...|[please, be, a, p...|         1.0|  11.3558689276741|107.24402124716592|
+|SPOILERS:
+Doesn't...|[spoilers, doesnt...|        12.0|14.883750658179995| 8.316017858553554|
+|               Aw :(|              [aw, ]|         3.0|  6.91317672938615|15.312952115409283|
+|Hot Tub Time Mach...|[hot, tub, time, ...|         1.0| 9.270347161432131| 68.39864217060851|
+|The third one was...|[the, third, one,...|         2.0| 7.360028484407428|28.729905353658985|
++--------------------+--------------------+------------+------------------+------------------+
+only showing top 10 rows
+
+Testing RMSE: 80.61552165695026

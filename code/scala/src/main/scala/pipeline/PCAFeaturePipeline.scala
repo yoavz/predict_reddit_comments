@@ -38,4 +38,8 @@ class PCAFeaturePipeline(kc: Int) extends FeaturePipeline {
 
 class PCAFeaturePipelineModel(modelc: PipelineModel) extends FeaturePipelineModel(modelc) {
   override def getCountVectorizerModel = null
+
+  override def getCommentBucketizerModel = {
+    model.stages(6).asInstanceOf[CommentBucketizerModel]; 
+  }
 }

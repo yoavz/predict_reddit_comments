@@ -1,8 +1,11 @@
 package redditprediction
 
+import scala.collection.JavaConversions._
+
 import org.apache.spark.{SparkContext, SparkConf}
-import org.apache.spark.SparkContext._
+import org.apache.spark.SparkContext
 import org.apache.spark.ml.{Pipeline, PipelineModel}
+import org.apache.spark.ml.classification.NaiveBayesModel
 import org.apache.spark.sql.{SQLContext, DataFrame, Row}
 import org.apache.spark.sql.types.{StructType,StructField,StringType}
 
@@ -16,13 +19,18 @@ import redditprediction.pipeline.{CommentBucketizerModel,
                                   SentimentFeaturePipeline, FeaturePipeline,
                                   FeaturePipelineModel,
                                   MetadataFeaturePipeline, TfidfFeaturePipeline,
-                                  PCAFeaturePipeline}
+                                  PCAFeaturePipeline, NaiveBayesFeaturePipeline}
 
-import scala.collection.JavaConversions._
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
 
-case class Config(local_file: String = "", s3_bucket_file: String = "", gs_file: String = "", pipeline: String = "bag", limit: Int = -1, mode: String = "linear", reg: Double = 0.0, buckets: Int = 50000);
+case class Config(local_file: String = "", s3_bucket_file: String = "", gs_file: String = "", pipeline: String = "bag", limit: Int = -1, mode: String = "linear", reg_param: Double = 0.0, buckets: Int = 50000);
 
 object RedditPrediction {
+
+  var config: Config = null;
+  val log: Logger = Logger.getLogger("redditprediction")
+  log.setLevel(Level.INFO)
 
   def main(args: Array[String]) {
 
@@ -45,7 +53,7 @@ object RedditPrediction {
       opt[Int]('l', "limit") action { (x, c) =>
         c.copy(limit = x) } text("Limit comments to a certain amount")
       opt[Double]('r', "reg_param") action { (x, c) =>
-        c.copy(reg = x) } text("regularization param for linear regression")
+        c.copy(reg_param = x) } text("regularization param for linear regression")
       opt[Int]('b', "buckets") action { (x, c) =>
         c.copy(buckets = x) } text("Number of buckets for the hashing trick, or vocab size for count vectorizing")
       help("help") text("prints this usage text")
@@ -54,20 +62,9 @@ object RedditPrediction {
     val sc = new SparkContext()
     var df: DataFrame = null;
 
-    var mode : String = ""
-    var pipeline_mode: String = ""
-    var limit: Int = -1;
-    var reg_param: Double = 0.0;
-    var buckets: Int = 50000;
-
     parser.parse(args, Config()) match { 
       case Some(config) => {
-
-        mode = config.mode;
-        limit = config.limit;
-        pipeline_mode = config.pipeline
-        reg_param = config.reg;
-        buckets = config.buckets;
+        this.config = config;
 
         // GCS BigQuery configuration
         if (config.gs_file.length > 0) { 
@@ -96,7 +93,7 @@ object RedditPrediction {
           val schema =
             StructType(columns.map(fieldName => StructField(fieldName, StringType, true)))
 
-          println(s"Loading from bigquery bucket: ${fullTableId}")
+          log.info(s"Loading from bigquery bucket: ${fullTableId}")
           val RDD = sc.newAPIHadoopRDD(
             conf, 
             classOf[GsonBigQueryInputFormat],
@@ -107,7 +104,7 @@ object RedditPrediction {
             Row.fromSeq(columns.map({ k: String => pair._2.get(k).getAsString }))
           })
           df = sqlContext.createDataFrame(rowRDD, schema).cache()
-          println(s"Loaded ${df.count()} rows")
+          log.info(s"Loaded ${df.count()} rows")
 
         } else if (config.s3_bucket_file.length > 0) {
           val conf = sc.hadoopConfiguration;
@@ -116,117 +113,191 @@ object RedditPrediction {
 
           val sqlContext = new SQLContext(sc);
           val s3Path = "s3n://cs260-yoavz/" + config.s3_bucket_file + ".json"
-          println(s"Loading from amazon s3 path: ${s3Path}")
+          log.info(s"Loading from amazon s3 path: ${s3Path}")
           df = sqlContext.read.json(s3Path).cache
 
         } else if (config.local_file.length > 0) {
           val sqlContext = new SQLContext(sc);
-          println(s"Loading from local path: ${config.local_file}")
+          log.info(s"Loading from local path: ${config.local_file}")
           df = sqlContext.read.json(config.local_file);
         } else {
-          println("Must specify a local or remote file!");
+          log.info("Must specify a local or remote file!");
           return
         }
       }
 
       case None => {
-        println("argument error")
+        log.info("argument error")
         return
       }
     }
 
-    println(s"${df.count()} total comments");
+    log.info(s"${df.count()} total comments");
 
     // Filtering logic for removed and deleted comments
     val filtered = df.filter(df("author") !== "[deleted]")
                      .filter(df("body") !== "[removed]")
                      .filter(df("body") !== "[deleted]");
-    println(s"${filtered.count()} total comments after filtering");
+    log.info(s"${filtered.count()} total comments after filtering");
 
     // Limiting
-    val limited = if (limit > 0) { 
-      filtered.limit(limit).cache
+    val limited = if (config.limit > 0) { 
+      filtered.limit(config.limit).cache
     } else {
       filtered.cache
     }
-    println(s"${limited.count()} comments after limiting");
+    log.info(s"${limited.count()} comments after limiting");
 
     // Preprocessing
     var featurePipeline: FeaturePipeline = null;
-    if (pipeline_mode == "sentiment") {
-      println("Using sentiment feature pipeline")
+    if (config.mode == "binary")  {
+      log.info("Using binary bayes feature pipeline")
+      featurePipeline = new NaiveBayesFeaturePipeline(true);
+    } else if (config.mode == "bayes") {
+      // bayes mode overrides all other pipeline modes
+      log.info("Using bayes feature pipeline")
+      featurePipeline = new NaiveBayesFeaturePipeline();
+    } else if (config.pipeline == "sentiment") {
+      log.info("Using sentiment feature pipeline")
       featurePipeline = new SentimentFeaturePipeline();
-    } else if (pipeline_mode == "metadata") {
-      println("Using metadata feature pipeline")
+    } else if (config.pipeline == "metadata") {
+      log.info("Using metadata feature pipeline")
       featurePipeline = new MetadataFeaturePipeline();
-    } else if (pipeline_mode == "tfidf") {
-      println("Using tfidf feature pipeline")
-      featurePipeline = new TfidfFeaturePipeline(buckets);
-    } else if (pipeline_mode == "pca") {
-      println(s"Using pca feature pipeline, using k = ${buckets}")
-      featurePipeline = new PCAFeaturePipeline(buckets);
+    } else if (config.pipeline == "tfidf") {
+      log.info("Using tfidf feature pipeline")
+      featurePipeline = new TfidfFeaturePipeline(config.buckets);
+    } else if (config.pipeline == "pca") {
+      log.info(s"Using pca feature pipeline, using k = ${config.buckets}")
+      featurePipeline = new PCAFeaturePipeline(config.buckets);
+    } else if (config.pipeline == "all")  {
+      val pipelines: List[(String, FeaturePipeline)] = 
+        List(("bag", new FeaturePipeline(config.buckets)), 
+             ("tfidf", new TfidfFeaturePipeline(config.buckets)),
+             ("metadata", new MetadataFeaturePipeline()))
+      pipelines.map(t =>  (t._1, trainWithPipeline(t._2, limited))).foreach(log.info)
+      return;
     } else {
-      println("Using bag of words feature pipeline")
-      featurePipeline = new FeaturePipeline(buckets);
+      log.info("Using bag of words feature pipeline")
+      featurePipeline = new FeaturePipeline(config.buckets);
     }
 
-    val featurePipelineModel: FeaturePipelineModel = featurePipeline.fit(limited)
-    val featured = featurePipelineModel.transform(limited) 
-    println(s"${featured.count()} total comments after preprocessing");
-    featured.select("body", "words", "features").take(10).foreach(println)
+    trainWithPipeline(featurePipeline, limited)
+  }
+
+  def trainWithPipeline(featurePipeline: FeaturePipeline, dataset: DataFrame): Double = {
+
+    val featurePipelineModel: FeaturePipelineModel = featurePipeline.fit(dataset)
+    val featured = featurePipelineModel.transform(dataset) 
+    // featured.select("body", "words", "features").take(10).foreach(log.info)
 
     // Split Train/Test
     val train_to_test = 0.70;
-    val Array(train, test) = featured.randomSplit(Array(train_to_test, 1-train_to_test));
-    println(s"Split into ${train.count()} training and ${test.count()} test comments");
+    val random_seed = 11L;
+
+    val Array(train, test) = featured.randomSplit(Array(train_to_test, 1-train_to_test), random_seed);
+    log.info(s"Split into ${train.count()} training and ${test.count()} test comments");
 
     val regs: Array[Double] = (-5 to 5).toArray.map(x => scala.math.pow(2, x))
     // Do the training
-    if (mode == "logistic") {
-      println("Learning using Logistic Regression");
+    if (config.mode == "binary") {
+      log.info("Learning using Binary Naive Bayes");
+      val bayes = new RedditNaiveBayes(true);
+      bayes.train(train)
+      val test_accu: Double = bayes.test(test)
+    
+      val bucketizer: CommentBucketizerModel = 
+        featurePipelineModel.getCommentBucketizerModel
+      if (bucketizer != null) {
+        log.info(s"Actual (training) distribution:")
+        bucketizer.explainBucketDistribution(featured, "score_bucket", log)
+      }
+
+      log.info(s"Test accuracy: ${test_accu}")
+    } else if (config.mode == "bayes") {
+      log.info("Learning using Naive Bayes");
+      val bayes = new RedditNaiveBayes(false);
+      bayes.train(train)
+      val test_accu: Double = bayes.test(test)
+    
+      val bucketizer: CommentBucketizerModel = 
+        featurePipelineModel.getCommentBucketizerModel
+      if (bucketizer != null) {
+        log.info(s"Actual (training) distribution:")
+        bucketizer.explainBucketDistribution(featured, "score_bucket", log)
+      }
+
+      explainWeightsNB(featurePipelineModel, 10)
+      log.info(s"Test accuracy: ${test_accu}")
+    } else if (config.mode == "logistic") {
+      log.info("Learning using Logistic Regression");
       val logistic = new RedditLogisticRegression();
       logistic.trainWithRegularization(train, regs)
-      logistic.test(test)
-      println("-") 
-      println(s"Actual (training) distribution:")
+      val test_accu: Double = logistic.test(test)
+
       val bucketizer: CommentBucketizerModel = 
-        featurePipelineModel.model.stages(4).asInstanceOf[CommentBucketizerModel]
-      bucketizer.explainBucketDistribution(featured, "score_bucket")
-    } else if (mode == "reg") {
-      println("Learning using Linear Regression (reg search)");
+        featurePipelineModel.getCommentBucketizerModel
+      if (bucketizer != null) {
+        log.info(s"Actual (training) distribution:")
+        bucketizer.explainBucketDistribution(featured, "score_bucket", log)
+      }
+
+      explainWeightsNB(featurePipelineModel, 10)
+      log.info(s"Test accuracy: ${test_accu}")
+    } else if (config.mode == "reg") {
+      log.info("Learning using Linear Regression (reg search)");
       val regr = new RedditRidgeRegression();
       var history: Seq[(Double, Double, Double)] = regs.map{ reg =>
-        val train_rmse = regr.train(train, reg)
+        val train_rmse = regr.train(train, reg);
         val test_rmse = regr.test(test)
         (reg, train_rmse, test_rmse)
       }
-      history.foreach(println)
-    } else if (mode == "ridge") {
-      println("Learning using Ridge Regression");
+      history.foreach(log.info)
+      return 0.0 // can ignore the return value of this
+    } else if (config.mode == "ridge") {
+      log.info("Learning using Ridge Regression");
       val regr = new RedditRidgeRegression();
-      regr.train(train, regs);
-      regr.test(test);
+      val (train_best_reg, train_rmse) = regr.train(train, regs);
+      log.info(s"Training RMSE: ${train_rmse}, Best Lambda: ${train_best_reg}");
       featurePipelineModel.explainWeights(
         regr.getRegressionModel.weights.toArray, 10)
-    } else if (mode == "forest") {
-      println("Learning using Random Forest Regression");
+      val test_rmse: Double = regr.test(test) 
+      log.info(s"Testing RMSE: ${test_rmse}")
+      return test_rmse
+    } else if (config.mode == "forest") {
+      // TODO: print if you use these vals
+      log.info("Learning using Random Forest Regression");
       val regr = new RedditRandomForestRegression();
       regr.train(train);
       regr.test(test);
-    } else if (mode == "sgd") {
-      println("Learning using Linear Regression SGD")
+    } else if (config.mode == "sgd") {
+      log.info("Learning using Linear Regression SGD")
       val regr = new RedditRegression();
       regr.trainSGD(train, test);
     } else {
-      println(s"Learning using Vanilla Linear Regression, using reg param: ${reg_param}");
+      log.info(s"Learning using Vanilla Linear Regression, using reg param: ${config.reg_param}");
       val regr = new RedditRegression();
-      regr.train(train, reg_param);
-      regr.test(test);
+      val train_rmse = regr.train(train, config.reg_param);
+      log.info(s"Training RMSE: ${train_rmse}")
       featurePipelineModel.explainWeights(
         regr.getRegressionModel.weights.toArray, 10)
+      val test_rmse = regr.test(test);
+      log.info(s"Testing RMSE: ${test_rmse}")
       // regr.getRegressionModel.summary.objectiveHistory.zipWithIndex.foreach{ 
-      //   case (hist, iter) => println(s"Iteration ${iter}: ${hist}")
+      //   case (hist, iter) => log.info(s"Iteration ${iter}: ${hist}")
       // }
     }
+    0.0
+  }
+
+  def explainWeightsNB(model: NaiveBayesModel, top: Int) = {
+    log.info(s"Displaying top ${top} features");
+
+    log.info(s"Displaying top ${top} features");
+    val words: Int = model.theta.numCols;
+    (0 to words).map{ t =>
+      (t, model.theta.apply(0, t))
+    }.sortBy(-_._2)
+     .take(top)
+     .foreach(log.info)
   }
 }

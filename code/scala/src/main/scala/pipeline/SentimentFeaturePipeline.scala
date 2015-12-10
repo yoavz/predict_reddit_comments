@@ -33,4 +33,8 @@ class SentimentFeaturePipelineModel(modelc: PipelineModel) extends FeaturePipeli
   override def getCountVectorizerModel = {
     model.stages(3).asInstanceOf[CountVectorizerModel]; 
   }
+
+  override def getCommentBucketizerModel = {
+    model.stages(5).asInstanceOf[CommentBucketizerModel]; 
+  }
 }

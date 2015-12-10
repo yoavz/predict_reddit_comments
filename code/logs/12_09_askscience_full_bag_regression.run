@@ -1,0 +1,40 @@
+Loading from bigquery bucket: cs260-1128:15_09.askscience
+Loaded 50162 rows
+50162 total comments
+27747 total comments after filtering
+27747 comments after limiting
+Using bag of words feature pipeline
+Split into 19443 training and 8304 test comments
+Learning using Ridge Regression
+Tried C: 0.03125, 0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0
+Best C: 32.0
+Training RMSE: 33.08283844591974
+Training RMSE: 32.0, Best Lambda: 33.08283844591974
+Displaying top 10 features
+[1209.978104206903] Word improbability
+[1109.4768407429842] Word fari
+[1109.4768407429842] Word awaymaybe
+[1050.9313749206974] Word orb
+[929.064418261864] Word 10994
+[666.162529705064] Word uphilippugeauhttpswwwredditcomrasksciencecomments3mksongiventimetodecompressslowlycouldahumancvfv99o
+[666.162529705064] Word waterhttpsuploadwikimediaorgwikipediacommons008phasediagramofwatersvg
+[640.9091733193218] Word linkhttplinasorgtheorysetihtml
+[553.9659370756087] Word problemhttpsenwikipediaorgwikibirthdayproblem
+[539.2769099879329] Word saunas
++--------------------+--------------------+------------+-------------------+--------------------+
+|                body|               words|score_double|         prediction|              sq_err|
++--------------------+--------------------+------------+-------------------+--------------------+
+|That's an interes...|[thats, an, inter...|         1.0|-1.6195882844069542|    6.86224277980217|
+|Hi striker7770 th...|[hi, striker7770,...|         1.0| 1.5653943681945481|  0.3196707915861123|
+|Similarly, formic...|[similarly, formi...|         5.0| 28.425554087396982|   548.7565843015615|
+|Now lets say we s...|[now, lets, say, ...|         1.0| 22.081736388636465|   444.4396091599588|
+|Hi ual002 thank y...|[hi, ual002, than...|         1.0| 1.0474353787823363|0.002250115160223719|
+|Laminar flow is m...|[laminar, flow, i...|         4.0|-10.043276872980831|  197.21362533119827|
+|This was mind bog...|[this, was, mind,...|         1.0|  3.504581013947866|    6.27292605542812|
+|Thank you for you...|[thank, you, for,...|         1.0| 0.9177006215000656|0.006773187701475465|
+|The short answer ...|[the, short, answ...|        12.0| 22.703634917815243|  114.56780045387373|
+|Even if an ancest...|[even, if, an, an...|         0.0| 27.868807969811073|   776.6704576582051|
++--------------------+--------------------+------------+-------------------+--------------------+
+only showing top 10 rows
+
+Testing RMSE: 89.4335089975808

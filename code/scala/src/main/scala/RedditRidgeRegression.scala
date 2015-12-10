@@ -8,7 +8,7 @@ import org.apache.spark.ml.evaluation.RegressionEvaluator
 
 class RedditRidgeRegression extends RedditRegression {
 
-  def train(dataset: DataFrame, regs: Array[Double]) = {
+  def train(dataset: DataFrame, regs: Array[Double]): (Double, Double) = {
     val lr = new LinearRegression()
       .setFeaturesCol("features")
       .setLabelCol("score_double");
@@ -41,5 +41,7 @@ class RedditRidgeRegression extends RedditRegression {
     if (bestLr.hasSummary) {
       println(s"Training RMSE: ${bestLr.summary.rootMeanSquaredError}")
     }
+
+    return (bestLr.getRegParam, bestLr.summary.rootMeanSquaredError)
   }
 }

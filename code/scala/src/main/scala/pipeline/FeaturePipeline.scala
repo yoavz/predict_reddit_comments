@@ -7,6 +7,9 @@ import org.apache.spark.ml.feature.{CountVectorizer, Tokenizer, VectorAssembler,
                                     CountVectorizerModel}
 import org.apache.spark.ml.feature.StandardScaler
 
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
+
 class FeaturePipeline(vocabSize: Int = -1) {
   // initialization
   val tokenizer: Tokenizer = new Tokenizer()
@@ -37,7 +40,7 @@ class FeaturePipeline(vocabSize: Int = -1) {
     .setInputCol("hour")
     .setOutputCol("hour_encoded")
 
-  val bucketizer: CommentBucketizer = new CommentBucketizer()
+  val bucketizer: CommentBucketizer = new CommentBucketizer(false)
     .setScoreCol("score_double")
     .setScoreBucketCol("score_bucket")
 
@@ -66,16 +69,23 @@ class FeaturePipelineModel(modelc: PipelineModel) {
     model.stages(3).asInstanceOf[CountVectorizerModel]; 
   }
 
+  def getCommentBucketizerModel = {
+    model.stages(5).asInstanceOf[CommentBucketizerModel]; 
+  }
+
   def explainWeights(weights: Array[Double], top: Int) = {
-    println(s"Displaying top ${top} features");
+    val log: Logger = Logger.getLogger("redditprediction")
+    log.setLevel(Level.INFO)
+
+    log.info(s"Displaying top ${top} features");
     weights.zipWithIndex.sortBy(-_._1).take(top).foreach{ t =>
       val weight = t._1
       val idx = t._2
       if (getCountVectorizerModel != null &&
           idx < getCountVectorizerModel.vocabulary.length) {
-        println(s"[${weight}] Word ${getCountVectorizerModel.vocabulary(idx)}");
+        log.info(s"[${weight}] Word ${getCountVectorizerModel.vocabulary(idx)}");
       } else {
-        println(s"[${weight}] Feature ${idx}");
+        log.info(s"[${weight}] Feature ${idx}");
       }
     }
   }

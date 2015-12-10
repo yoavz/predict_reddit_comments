@@ -40,13 +40,13 @@ abstract class RedditClassification {
     setModel(model)
   }
 
-  def test(dataset: DataFrame) = {
+  def test(dataset: DataFrame): Double = {
     val model = getModel
     // test accuracy
     val predictions = model.transform(dataset);
     val accuracy = predictions.filter("score_bucket = prediction")
                               .count().toDouble / predictions.count().toDouble
-    println(s"Test Accuracy: ${accuracy}");
+    return accuracy
   }
 
   // TODO: saving models may be hard :(

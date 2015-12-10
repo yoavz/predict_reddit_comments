@@ -26,20 +26,8 @@ class RedditRegression {
     getModel.stages(0).asInstanceOf[LinearRegressionModel]
   }
 
-  def train(dataset: DataFrame) = {
-    val lr = new LinearRegression()
-      .setFeaturesCol("features")
-      .setLabelCol("score_double");
-    
-    val pipeline = new Pipeline()
-      .setStages(Array(lr));
-    val model = pipeline.fit(dataset);
-    setModel(model)
-
-    val lrModel = model.stages(0).asInstanceOf[LinearRegressionModel]
-    if (lrModel.hasSummary) {
-      println(s"Training RMSE: ${lrModel.summary.rootMeanSquaredError}")
-    }
+  def train(dataset: DataFrame): Double = {
+    train(dataset, 0.0)
   }
 
   def train(dataset: DataFrame, reg: Double): Double = {
@@ -54,9 +42,6 @@ class RedditRegression {
     setModel(model)
 
     val lrModel = model.stages(0).asInstanceOf[LinearRegressionModel]
-    if (lrModel.hasSummary) {
-      println(s"Training RMSE: ${lrModel.summary.rootMeanSquaredError}")
-    }
 
     return lrModel.summary.rootMeanSquaredError
   }
@@ -71,7 +56,6 @@ class RedditRegression {
     val mse: Double = sqError.agg(avg(col("sq_err"))).first().getDouble(0)
     val rmse: Double = scala.math.sqrt(mse)
 
-    println(s"Testing RMSE: ${rmse}");
     sqError.select("body", "words", "score_double", "prediction", "sq_err").show(10)
     return rmse
   }
@@ -107,6 +91,5 @@ class RedditRegression {
       .map(p => scala.math.pow(p._1 - p._2, 2))
       .mean()
     val rmse: Double = scala.math.sqrt(mse)
-    println(s"Testing RMSE: ${rmse}");
   }
 }

@@ -41,16 +41,57 @@ Although there has some previous academic research on the subject of on the popu
 		\item number of punctuations (?, !)
 	\end{enumerate}
 
-\section{Methods}
-
-	\subsection{Implementation}
-	TODO:
+\section{Models}
+	There two types of learning models that we could apply to the features we came up
+	
+	\subsection{Regression}
+	The most intutive model to predict the score of a comment given it's features is to use a regression model. An advantage of a regression model is it naturally maps well to the dataset, as the score labels associated with each comment are ``continuous'' integers. A Ridge Regression model was used, which learns a weight vector $\mathbf{w}$ over the following loss function:
+	\begin{gather*}
+		\sum^N{ (\mathbf{w^T} \mathbf{x_n} - \mathbf{y_n})^2} + \lambda \sum^N{ w }
+	\end{gather*}
+	where $\lambda$ is a hyperparameter tuned by cross-validation testing.
+	
+	\subsection{Classification}
+	Another approach is to divide the comments into buckets based on their scores, and attempt to learn a multi-class classification model over these buckets. This model includes several complications that do not arise in the case of regression. First, the number of buckets introduces another ``hyperparameter'' into the algorithm- with a larger amount of buckets the model will have predict a finer granularity of scores, but too many buckets will result in a too difficult of a model to learn. In addition, the distribution of the dataset was heavily skewed towards lower scored comments in the range of 0-5. To address these complications, each comment was assigned to a bucket according to a log scale:
+	\begin{gather*}
+		bucket_n = \begin{cases}
+				0 & score_n \le 0 \\
+				log_2(score_n) + 1 & score_n \geq 0
+				 \end{cases}
+	\end{gather*}
+	
+	After the comments are put into buckets, a One-vs-Rest model can be used to construct $k-1$ classifiers over $k$ buckets. The classification algorithms experimented with were Logistic Regression and Naive Bayes. TODO: more classification algorithms?
 
 \section{Implementation}
+	The feature processing and learning models were implemented by the 
 
 \section{Results and Evaluation}
 
-First, we will use Google BigQuery to divide the data into subreddit comment sets. We plan on representing each reddit comment with the following types of features:
+/r/askreddit with buckets = vocabSize = 10000
+
+pipeline, test error, best reg param
+(bag,144.7044629037733, 0.03125)
+(tfidf,147.2399698192555, 32)
+(metadata,118.75863545502081, 32)
+
+/r/movies with buckets = vocabSize = 10000
+
+(bag,85.38828682328494, 32)
+(tfidf,84.3943617278876, 32)
+(metadata,53.43337526230372, 2)
+
+/r/hiphopheads
+
+(bag,36.673371574989766. 32)
+(tfidf,36.71083116813651, 32)
+(metadata,38.63094133654731, 0.03125)
+
+/r/askscience
+
+(bag,117.9463278092658)
+(tfidf,122.12027363796126)
+(metadata,116.28251182008567)
+
 
 \section{Future Work}
 

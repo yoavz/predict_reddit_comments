@@ -24,5 +24,9 @@ class MetadataFeaturePipeline extends FeaturePipeline {
 }
 
 class MetadataFeaturePipelineModel(modelc: PipelineModel) extends FeaturePipelineModel(modelc) {
-  override  def getCountVectorizerModel = null
+  override def getCountVectorizerModel = null
+
+  override def getCommentBucketizerModel = {
+    model.stages(3).asInstanceOf[CommentBucketizerModel]; 
+  }
 }
