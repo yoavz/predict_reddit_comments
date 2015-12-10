@@ -188,9 +188,13 @@ object RedditPrediction {
       config = config.copy(mode = "bayes")
       val bayes_acc = trainWithPipeline(new NaiveBayesFeaturePipeline(false), limited)
       config = config.copy(mode = "logistic")
-      val log_acc = trainWithPipeline(new FeaturePipeline(config.buckets), limited)
+      val log_feat_acc = trainWithPipeline(new FeaturePipeline(config.buckets), limited)
+      val log_tfidf_acc = trainWithPipeline(new TfidfFeaturePipeline(config.buckets), limited)
+      val log_metadata_acc = trainWithPipeline(new MetadataFeaturePipeline(), limited)
       log.info(s"Naive Bayes Test Accuracy: ${bayes_acc}")
-      log.info(s"Logistic Test Accuracy: ${log_acc}")
+      log.info(s"Logistic Test Accuracy [Feature]: ${log_feat_acc}")
+      log.info(s"Logistic Test Accuracy [TFIDF]: ${log_feat_acc}")
+      log.info(s"Logistic Test Accuracy [Metadata]: ${log_metadata_acc}")
       return
     } else {
       log.info("Using bag of words feature pipeline")
@@ -213,7 +217,7 @@ object RedditPrediction {
     val Array(train, test) = featured.randomSplit(Array(train_to_test, 1-train_to_test), random_seed);
     log.info(s"Split into ${train.count()} training and ${test.count()} test comments");
 
-    val regs: Array[Double] = (-5 to 5).toArray.map(x => scala.math.pow(2, x))
+    val regs: Array[Double] = (-3 to 3).toArray.map(x => scala.math.pow(2, x))
     // Do the training
     if (config.mode == "binary") {
       log.info("Learning using Binary Naive Bayes");
@@ -266,6 +270,8 @@ object RedditPrediction {
         bucketizer.explainBucketDistribution(featured, "score_bucket", log)
       }
 
+      featurePipelineModel.explainWeights(
+        logistic.getLrModel.weights.toArray, 10)
       log.info(s"Test accuracy: ${test_accu}")
       return test_accu
     } else if (config.mode == "reg") {

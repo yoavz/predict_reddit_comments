@@ -15,6 +15,11 @@ class RedditLogisticRegression extends RedditClassification {
       .setLabelCol("score_bucket");
   }
 
+  def getLrModel: LogisticRegressionModel = {
+    return getModel.stages(0).asInstanceOf[OneVsRestModel]
+                   .models(0).asInstanceOf[LogisticRegressionModel];
+  }
+
   override def explainTraining() = {
     val model = getModel 
     // val multiLrModel = model.stages(2).asInstanceOf[OneVsRestModel];
@@ -78,9 +83,7 @@ class RedditLogisticRegression extends RedditClassification {
     setModel(model)
 
     println(s"Tried C: ${regs.deep.mkString(", ")}");
-    val bestLr = model.stages(0).asInstanceOf[OneVsRestModel]
-                      .models(0).asInstanceOf[LogisticRegressionModel];
-    println(s"Best C: ${bestLr.getRegParam}")
+    println(s"Best C: ${getLrModel.getRegParam}")
   }
 
   def trainReg(dataset: DataFrame, reg: Double) = {

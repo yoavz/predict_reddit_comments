@@ -2,8 +2,11 @@
 \usepackage{enumitem}
 \usepackage{amsmath}
 \usepackage{amsfonts}
-\usepackage{natbib}
 \usepackage{url}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{caption}
+\captionsetup{font=small}
 \renewcommand{\thesubsection}{\alph{subsection}.}
 
 \begin{document}
@@ -18,31 +21,58 @@ TODO: write after
 
 \section{Motivation}
 
-TODO: update [copied from proposal]
-
-Voting systems are a standard part of many online communities. Whether the measure is ``likes'' on a facebook status, “hearts” on a picture in Instagram, or “upvotes” on a submission from Reddit, these voting systems often define which online content receives the most attention. Understanding the dynamics of user behavior in voting systems has applications in the world of online advertising, voting algorithm design, and viral marketing. In this project, we plan on examining the popularity of online content through Reddit \textit{comment karma}. Reddit is a website that aggregates link submissions, and allows users to either “upvote” or “downvote” other users comments on submissions. These votes are aggregated into a single, dynamic karma score for each Reddit comment. By attempting to formulate a model for predicting Reddit \textit{comment karma} on a given subreddit, we hope to gain insights into why and how comments go viral on that subreddit. Furthermore, a prediction function on comment karma for a given subreddit could provide an interesting similarity measure between it and other subreddits.
+Voting systems are a standard part of many online communities. Whether the measure is ``likes'' on a facebook status, “hearts” on a picture in Instagram, or “upvotes” on a submission from Reddit, these voting systems often define which online content receives the most attention. Understanding the dynamics of user behavior in voting systems has applications in the world of online advertising, voting algorithm design, and viral marketing. Reddit is one such website that aggregates link submissions, and allows users to either “upvote” or “downvote” other users comments on submissions. By attempting to formulate a text-based model for predicting Reddit \textit{comment karma} on a given subreddit, we hope to gain insights into what text elements make a comment ``good'' or ``bad''.
 
 \section{Background}
 
-Although there has some previous academic research on the subject of on the popularity of online content, there has been very little work exploring the prediction of the popularity of user-generated text, in particular. Szabo (http://www.hpl.hp.com/research/idl/papers/predictions/predictions.pdf) was able to forecast the long-term (30 day) popularity of Digg content with relative success using short-term (2 hour) user access and popularity data. There have been several student projects of specifically attempting to predict popularity of user-submitted comments of websites such as HackerNews and Reddit. Lamberson et. Al (TODO: reference) is a project that uses a large variety of features to attempt to predict scores of Reddit comments by using a prediction model. Lakkaraju is another student project that attempts predicting the score of top-level reddit submissions (note the difference from \textit{comments}). 
+Although there has some previous academic research on the subject of on the popularity of online content, there has been very little work exploring the prediction of the popularity of user-generated text, in particular. Szabo \cite{predict_digg} was able to forecast the long-term (30 day) popularity of Digg content with relative success using short-term (2 hour) user access and popularity data. There have been several student projects of specifically attempting to predict popularity of user-submitted comments of websites such as HackerNews and Reddit. Lamberson et. Al \cite{lamberson} is a project that uses a large variety of features to attempt to predict scores of Reddit comments by using a prediction model. Lakkaraju is another student project that attempts predicting the score of top-level reddit submissions (note the difference from \textit{comments}). 
 
 \section{Data}
 	\subsection{Dataset}
-	The dataset used in this project was using the publicly available dataset of 1.7 billion reddit comments (include reference). The strength of the dataset was in it's large size. The weakness was that the data associated each comment only consisted of basic features such as body text, author, time posted, and score of the comment. To collect more potentially important metadata such as the depth of a comment, a web crawler would be required to collect more data and augment this dataset. Since augmenting such a large dataset in this way is unpractical, this project aimed to focus mainly on features from the body text.
+	The dataset used in this project was using the publicly available dataset of 1.7 billion reddit comments \cite{dataset}. Although this dataset is very large, the features are relatively sparse; each comment only consists of basic features such as body text, author, time posted, and score of the comment. To narrow down to a more usuable data set, only comments from the month of September 2015 were used. Next comments were grouped by subreddit so that seperate models could be trained on each subreddit. The following are some example counts of amounts of comments:
+	
+	\begin{table}[h!]
+	\centering
+	\begin{tabular}{  c | c  c  c | }
+	\cline{2-4}
+	 & \multicolumn{3}{ |c| } {Feature Variants} \\
+	\hline
+	\multicolumn{1}{|c|}{Subreddit} & Bag & TF-IDF & Metadata \\
+	 \hline
+	 \hline
+	\multicolumn{1}{|c|}{/r/askreddit} & 144.70 & 147.24 & 118.76 \\
+	\hline
+	\multicolumn{1}{|c|}{/r/movies} & 85.39 & 84.39 & 53.43 \\
+	\hline
+	\multicolumn{1}{|c|}{/r/hiphopheads} & 36.67 & 36.71 & 38.63 \\
+	\hline
+	\multicolumn{1}{|c|}{/r/askscience} & 117.95 & 122.12 & 116.28 \\
+	\hline
+	\end{tabular}
+	\caption{Linear Regression on 10k comment subsets}
+	\end{table}
 	
 	\subsection{Features}
-	The were N features extracted from each comment, most of which were extracted from the text of the comment itself. The main features are described below:
+	The most significant feature used in experiments was a vector representing the text body. First, the text body was tokenized on whitespace and stripped of non-alphanumeric characters. Then, there two approaches to vectorize this list of tokens. One is a unigram \textbf{bag-of-words model} in which the value $c_i$ corresponds to the amount of time token $w_i$ appears in the comment body. Another representation often used on text corpus' is \textbf{Term-Frequency $\cdot$Inverse-Term-Frequency} (TFIDF), where the term frequency is the same counts value as in the bag-of-words model, and the inverse term frequency is a measure of how much information a ``word'' provides.
+	
+	\begin{gather*}
+		idf(t) = log \bigg( \frac{\sum_{d \in D}{1}}{\sum_{d \in D; t \in d}{1}} \bigg)
+	\end{gather*}
+		
+	In addition to the body vector features, there were 7 metadata features extracted from each comment:
 	\begin{enumerate}
-		\item Bag of Words
-		\item Counts (character count, word count)
-		\item Average token length
-		\item hour of time posted
-		\item sentiment analysis (using AFINN-111.txt)
-		\item number of punctuations (?, !)
+		\setlength\itemsep{0em}
+		\item Character Count
+		\item Token Count
+		\item Average Token Length
+		\item Sentiment Analysis using the AFINN-111 dataset \cite{sentiment} 
+		\item Number of question (?) marks
+		\item Number of exclamation (!) marks
+		\item Hour of Time posted
 	\end{enumerate}
 
 \section{Models}
-	There two types of learning models that we could apply to the features we came up
+	There are two families of models that may be applied to this problem.
 	
 	\subsection{Regression}
 	The most intutive model to predict the score of a comment given it's features is to use a regression model. An advantage of a regression model is it naturally maps well to the dataset, as the score labels associated with each comment are ``continuous'' integers. A Ridge Regression model was used, which learns a weight vector $\mathbf{w}$ over the following loss function:
@@ -52,8 +82,9 @@ Although there has some previous academic research on the subject of on the popu
 	where $\lambda$ is a hyperparameter tuned by cross-validation testing.
 	
 	\subsection{Classification}
-		Another approach to modeling this problem is to bucket the comments into $k$ score buckets and then run a classification algorithm on them. The two classification algorithms experimented with were Logistic Regression and Multinomial Naive Bayes. TODO: include why they are different? (http://www.cs.cmu.edu/~tom/mlbook/NBayesLogReg.pdf).  \\
-		This model includes several complications that do not arise in the case of regression. First, the number of buckets introduces another ``hyperparameter'' into the algorithm- with a larger amount of buckets the model will have predict a finer granularity of scores, but too many buckets will result in a too difficult of a model to learn. In addition, the distribution of the dataset was heavily skewed towards lower scored comments in the range of 0-5.
+	Another approach to modeling this problem is to bucket the comments into $k$ score buckets and then run a classification algorithm on them. The two classification algorithms experimented with were Logistic Regression and Multinomial Naive Bayes. \\
+	\\ 
+	This model includes several complications that do not arise in the case of regression. First, the number of buckets introduces another ``hyperparameter'' into the algorithm- with a larger amount of buckets the model will have predict a finer granularity of scores, but too many buckets will result in a too difficult of a model to learn. In addition, the distribution of the dataset was heavily skewed towards lower scored comments in the range of 0-5.
 		
 		\subsubsection{Bucket Classification}
 		To address these complications, one can assign each comment to a score bucket according to a log scale, which was one approach taken
@@ -69,42 +100,75 @@ Although there has some previous academic research on the subject of on the popu
 		Another approach is to cut the score of each comment at a threshold and divide the dataset into ``positive'' and ``negative'' comments. Note that this is a special case of bucket classification above, where number of buckets is equal to 2. As with above, Logistic Regression and Multinomial Naive Bayes models can be learned over the training data. The advantage to this model is that it is the least complex, and easiest to learn over. The large disadvantage to this model is that there is very little granularity and it is therefore not much use to map a comment to it's final score. Still, this model may give us some insight in feature analysis.
 
 \section{Implementation}
-	The large size of the dataset proved to be the most challenging part of this project. The feature processing and learning models were implemented using the Apache Spark (TODO: reference) distributed computing framework. The Spark framework was a good fit due to it's capabilities for distributed computation and that it comes with a API for all many learning models. Spark also has a rich API for feature preprocessing that was used to construct bag-of-words and TF-IDF vectors. Spark also comes with helper scripts to set up clusters to run on Amazon's EC2 cloud computing services. A cluster of 4 machines on Amazon EC2 were used to train some models for large amounts of comments (> 1,000,000 million comments). 
+	The large size of the dataset proved to be the most challenging part of this project. The feature processing and learning models were implemented using the Apache Spark \cite{spark} distributed computing framework. The Spark framework was a good fit due to it's capabilities for distributed computation and that it comes with the MLLib API for Ridge Regression, Multinomial Naive Bayes, . Spark also comes with helper scripts to set up clusters to run on Amazon's EC2 cloud computing services. A cluster of 4 machines on Amazon EC2 were used to train models with greater than 300,000 comments. \\
+	\\
+	When creating the bag of words model, the vocabulary size was limited to a maximum of 50,000 of the most frequently used words for scalability reasons. Simillarly, for TF-IDF vectorization the hashing trick \cite{hashing} was used to restrict the feature vector to a maximum of 50,000 words. 
 
+\section{Results/Evaluation}
 
-\section{Results and Evaluation}
+	\subsection{Regression}
+	To evaluate the effectiveness of regression models, the \textbf{Root Mean Squared Error (RMSE)} can be used to compare test errors across models. Intuitively, this can be thought of as how far, on average, a score prediction is from the actual score of a comment.
+	\begin{gather*}
+		\sqrt{\cfrac{\sum^N{(\mathbf{w^T} \mathbf{x_n} - \mathbf{y_n})^2}}{N}}
+	\end{gather*}
+	
+	The table below shows the testing RMSE after training and testing on 10,000 comment subset of four different subreddits. Each set of comments was split into 70\% training and 30\% testing. The three variants of feature vectors used were:
+	\begin{enumerate}
+		\setlength\itemsep{0em}
+		\item Bag of Words + Metadata features
+		\item TF-IDF + Metadata features
+		\item Only metadata features
+	\end{enumerate}
+	
+	\begin{table}[h!]
+	\centering
+	\begin{tabular}{  c | c  c  c | }
+	\cline{2-4}
+	 & \multicolumn{3}{ |c| } {Feature Variants} \\
+	\hline
+	\multicolumn{1}{|c|}{Subreddit} & Bag & TF-IDF & Metadata \\
+	 \hline
+	 \hline
+	\multicolumn{1}{|c|}{/r/askreddit} & 144.70 & 147.24 & 118.76 \\
+	\hline
+	\multicolumn{1}{|c|}{/r/movies} & 85.39 & 84.39 & 53.43 \\
+	\hline
+	\multicolumn{1}{|c|}{/r/hiphopheads} & 36.67 & 36.71 & 38.63 \\
+	\hline
+	\multicolumn{1}{|c|}{/r/askscience} & 117.95 & 122.12 & 116.28 \\
+	\hline
+	\end{tabular}
+	\caption{Linear Regression on 10k comment subsets}
+	\end{table}
 
-/r/askreddit with buckets = vocabSize = 10000
+	None of the results above are satisfactory, with TF-IDF performing very similary to Bag of Words, and metadata features even outperforming both in some cases. With this small and noisy, the models are \textit{severely overfitting} to the training set, as evidenced by the following plot of training and testing RMSE against the regularization parameter $\lambda$.
+	
+	\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\linewidth]{movies_plot_10k.png}
+	\label{movies_plot_10k}
+	\caption{RMSE against $\lambda$ for /r/movies}
+	\end{figure}
+	
+	The following table shows 
+	
+	\subsection{Multi-Class Classification}
+	To evaluate the effectiveness of classification models, the \textbf{precision} of several different 
+	
+	TODO: put in multi-class classification graphs
+	
+	\subsection{Binary Classification}
+	
+	TODO: put in binary classification graphs and discuss results
 
-pipeline, test error, best reg param
-(bag,144.7044629037733, 0.03125)
-(tfidf,147.2399698192555, 32)
-(metadata,118.75863545502081, 32)
-
-/r/movies with buckets = vocabSize = 10000
-
-(bag,85.38828682328494, 32)
-(tfidf,84.3943617278876, 32)
-(metadata,53.43337526230372, 2)
-
-/r/hiphopheads
-
-(bag,36.673371574989766. 32)
-(tfidf,36.71083116813651, 32)
-(metadata,38.63094133654731, 0.03125)
-
-/r/askscience
-
-(bag,117.9463278092658)
-(tfidf,122.12027363796126)
-(metadata,116.28251182008567)
-
+	The first several results 
 
 \section{Future Work}
-
+	
+	After dissapointing results 
 
 
 \bibliographystyle{acm}
-\bibliography{proposal}
+\bibliography{project}
 
 \end{document}

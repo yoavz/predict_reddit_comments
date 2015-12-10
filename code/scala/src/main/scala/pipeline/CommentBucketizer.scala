@@ -73,9 +73,9 @@ class CommentBucketizerModel(override val uid: String, maxScoreA: Double, meanSc
     if (binary) {
       val count_below = dataset.filter(col("score_double").leq(meanScore)).count()
       val count_above = dataset.filter(col("score_double").gt(meanScore)).count()
-      log.info(s"Median: ${meanScore}")
-      log.info(s"< Median: ${count_below}")
-      log.info(s">= Median: ${count_above}")
+      log.info(s"Median: ${meanScore} ")
+      log.info(s"< Median: ${count_below} (${count_below.toDouble / count.toDouble})")
+      log.info(s">= Median: ${count_above} (${count_above.toDouble / count.toDouble})")
     } else {
       val count = dataset.count()
       val buckets = dataset.groupBy(bucketCol).count()

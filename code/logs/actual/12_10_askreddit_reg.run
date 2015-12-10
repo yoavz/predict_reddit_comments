@@ -1,0 +1,31 @@
+Loading from bigquery bucket: cs260-1128:15_09.askreddit
+Loaded 3949561 rows
+3949561 total comments
+3656583 total comments after filtering
+1000000 comments after limiting
+Split into 700147 training and 299853 test comments
+Learning using Ridge Regression
+Training RMSE: 125.32229235404913, Best Lambda: 8.0
+Displaying top 10 features
+[3176.5642483459233] Word quitler
+[1971.215348399649] Word finetuned
+[1814.8336605404982] Word sported
+[1779.888124031941] Word durning
+[1237.0744150660514] Word vidkun
+[1166.6198399067473] Word limps
+[1107.2706073980487] Word ebolas
+[1068.573531297535] Word edit3
+[1052.015085330172] Word exacting
+[1039.8974963586413] Word extramarital
+Displaying bottom 10 features
+[-373.0132520779336] Word lapses
+[-372.40980074384856] Word erich
+[-356.7953348525824] Word bennigans
+[-349.0813892706505] Word qin
+[-300.50630789531044] Word commision
+[-276.7225531037992] Word misadventures
+[-266.88440773584574] Word underscore
+[-264.782470419311] Word rigidity
+[-250.76573903956435] Word 1102
+[-247.85232012237353] Word qm
+Testing RMSE: 149.42342363758016
