@@ -217,7 +217,7 @@ object RedditPrediction {
     val Array(train, test) = featured.randomSplit(Array(train_to_test, 1-train_to_test), random_seed);
     log.info(s"Split into ${train.count()} training and ${test.count()} test comments");
 
-    val regs: Array[Double] = (-3 to 3).toArray.map(x => scala.math.pow(2, x))
+    val regs: Array[Double] = 0.0 +: (-3 to 3).toArray.map(x => scala.math.pow(2, x))
     // Do the training
     if (config.mode == "binary") {
       log.info("Learning using Binary Naive Bayes");
