@@ -1,0 +1,260 @@
+Loading from bigquery bucket: cs260-1128:15_09.videos
+Loaded 602538 rows
+602538 total comments
+550192 total comments after filtering
+550192 comments after limiting
+Split into 384664 training and 165528 test comments
+Learning using Binary Naive Bayes
+Actual (training) distribution:
+Median: 3.0
+< Median: 423301 (0.769369601884433)
+>= Median: 126891 (0.23063039811556693)
+Displaying top 10 features
+[-2.7329907635170336] Word
+[-2.9211550541865456] Feature 235653
+[-4.587123994116226] Word like
+[-4.674205682232621] Word just
+[-4.842035648114049] Word people
+[-5.064250983683083] Word dont
+[-5.232205563679498] Word im
+[-5.333388812093412] Word time
+[-5.4208369116928505] Word think
+[-5.492262908823161] Word video
+Displaying bottom 10 features
+[-15.335363311344194] Word ella
+[-15.335363311344194] Word gtgreg
+[-15.335363311344194] Word gtoperator
+[-15.335363311344194] Word subtest
+[-15.335363311344194] Word cloudcreative
+[-15.335363311344194] Word cheezits
+[-15.335363311344194] Word motshekga
+[-15.335363311344194] Word werdum
+[-15.335363311344194] Word daffodil
+[-15.335363311344194] Word bolas
+Test accuracy: 0.7740986419216084
+Split into 384664 training and 165528 test comments
+Learning using Logistic Regression
+Actual (training) distribution:
+Median: 3.0
+< Median: 423301 (0.769369601884433)
+>= Median: 126891 (0.23063039811556693)
+Displaying top 10 features
+[2.5459512748237105] Word uncommonly
+[2.3271430542969966] Word gympool
+[2.317464246717459] Word gtemcees
+[2.2481729067911913] Word internetbreaking
+[2.2316971832815575] Word converses
+[2.2205146061954624] Word snlstyle
+[2.210114707526073] Word sequestration
+[2.201868328131913] Word notfat
+[2.200595993352111] Word rickie
+[2.166509627284072] Word reactively
+Displaying bottom 10 features
+[-3.9260188127126048] Word bombthreat
+[-3.385901858673918] Word shortcoming
+[-3.36933505649127] Word lockon
+[-3.318444682880382] Word 2902
+[-3.2526069708442984] Word eops
+[-3.2157585208146466] Word selfexamine
+[-3.1661319874112763] Word stregnths
+[-3.140582371474657] Word difficultdangerous
+[-3.1380233890806672] Word lawhttpsnpredditcomrshitamericanssaycomments3jm538enjoytheimmigrantsukillstayhereinsan
+[-3.104755507266032] Word halfhumans
+Test accuracy: 0.8122492871296699
+Naive Bayes Test Accuracy: 0.7740986419216084
+Logistic Test Accuracy: 0.8122492871296699
+Loading from bigquery bucket: cs260-1128:15_09.music
+Loaded 123794 rows
+123794 total comments
+114458 total comments after filtering
+114458 comments after limiting
+Split into 79964 training and 34494 test comments
+Learning using Binary Naive Bayes
+Actual (training) distribution:
+Median: 2.0
+< Median: 85847 (0.7500305789023047)
+>= Median: 28611 (0.24996942109769524)
+Displaying top 10 features
+[-1.4444683260887956] Word
+[-2.759574926652485] Feature 85397
+[-3.841615086318109] Word music
+[-4.833891389886002] Word title
+[-4.837609890245634] Word correct
+[-4.842450840225091] Word like
+[-5.020607770900263] Word post
+[-5.03723096619423] Word removed
+[-5.151881279183458] Word does
+[-5.1550034729303] Word submissions
+Displaying bottom 10 features
+[-14.41916893160139] Word azda
+[-14.41916893160139] Word blackitt
+[-14.41916893160139] Word havan
+[-14.41916893160139] Word renewal
+[-14.41916893160139] Word redownload
+[-14.41916893160139] Word lunar
+[-14.41916893160139] Word dylon
+[-14.41916893160139] Word astronomy
+[-14.41916893160139] Word westward
+[-14.41916893160139] Word bathory
+Test accuracy: 0.4513248680930017
+Split into 79964 training and 34494 test comments
+Learning using Logistic Regression
+Actual (training) distribution:
+Median: 2.0
+< Median: 85847 (0.7500305789023047)
+>= Median: 28611 (0.24996942109769524)
+Displaying top 10 features
+[2.3251339038507655] Word hitless
+[2.313146968719665] Word seamen
+[2.25097801023808] Word gein
+[2.1938841251396153] Word marrage
+[2.1501825303438324] Word gtfred
+[2.143123527144752] Word scotfree
+[2.1328105535060957] Word httpswwwyoutubecomwatchvwpobmy8m6o
+[2.1324545109815567] Word konspiracy
+[2.1066166159853674] Word anonymously
+[2.0894211608470714] Word httpsyoutube4447lt5gqokalways
+Displaying bottom 10 features
+[-3.0853752055133596] Word stevo
+[-2.9003851662645177] Word 2piece
+[-2.8333113950863242] Word babooomhttpswwwyoutubecomwatchvzbwtptdvnmw
+[-2.8074076290168] Word httpsopenspotifycomuserneedles13playlist02bodqknybo1suqhfpt2mq
+[-2.7735284267515268] Word energy10
+[-2.7651925373610906] Word mayflyhttpswwwyoutubecomwatchvhrrpx30ic9u
+[-2.752855963384134] Word stationslove
+[-2.749511599282329] Word atlsouthern
+[-2.7388509486697705] Word helplesshttpswwwyoutubecomwatchvozztodq37w0
+[-2.7049044983382013] Word bozard
+Test accuracy: 0.8240853481764945
+Naive Bayes Test Accuracy: 0.4513248680930017
+Logistic Test Accuracy: 0.8240853481764945
+Loading from bigquery bucket: cs260-1128:15_09.movies
+Loaded 308777 rows
+308777 total comments
+288522 total comments after filtering
+288522 comments after limiting
+Split into 201939 training and 86583 test comments
+Learning using Binary Naive Bayes
+Actual (training) distribution:
+Median: 4.0
+< Median: 219729 (0.7615675754361886)
+>= Median: 68793 (0.23843242456381142)
+Displaying top 10 features
+[-3.0215450051231567] Word
+[-3.096392704024602] Feature 126377
+[-4.253415921946216] Word movie
+[-4.558653030842828] Word like
+[-4.583810224002024] Word just
+[-5.118322454473892] Word think
+[-5.132083445856397] Word film
+[-5.157293893299487] Word really
+[-5.157528149342411] Word dont
+[-5.214158416391204] Word movies
+Displaying bottom 10 features
+[-14.615119147976037] Word pinkamina
+[-14.615119147976037] Word goodplease
+[-14.615119147976037] Word runnersup
+[-14.615119147976037] Word grossman
+[-14.615119147976037] Word sant
+[-14.615119147976037] Word mcluhan
+[-14.615119147976037] Word adler
+[-14.615119147976037] Word impersonating
+[-14.615119147976037] Word collier
+[-14.615119147976037] Word abides
+Test accuracy: 0.7832599933012254
+Split into 201939 training and 86583 test comments
+Learning using Logistic Regression
+Actual (training) distribution:
+Median: 4.0
+< Median: 219729 (0.7615675754361886)
+>= Median: 68793 (0.23843242456381142)
+Displaying top 10 features
+[2.3337742441376577] Word utbeowulf
+[2.27940711495223] Word blackhaired
+[2.209297721633499] Word wellwhat
+[2.206515769715008] Word mahr
+[2.1795683173508733] Word headcount
+[2.1515659133793763] Word ptaeverything
+[2.102539461971433] Word hiswait
+[2.100855045495451] Word wrongits
+[2.0663027804912493] Word embittered
+[2.062688103148677] Word vorenius
+Displaying bottom 10 features
+[-3.446572536449945] Word nostalgiaesque
+[-3.279605662902108] Word nondub
+[-3.1878337689378125] Word mancrying
+[-3.1814269076807657] Word ondine
+[-3.130715911528611] Word qol
+[-3.1209074572328332] Word jumpsuited
+[-3.1152782782445683] Word suckwhy
+[-3.103872862691782] Word httpswwwyoutubecomwatchv2p7bgmxewxa
+[-3.076113695462414] Word tortureshe
+[-3.0652642686547136] Word 720p1080p
+Test accuracy: 0.8111176558908793
+Naive Bayes Test Accuracy: 0.7832599933012254
+Logistic Test Accuracy: 0.8111176558908793
+Loading from bigquery bucket: cs260-1128:15_09.askreddit
+Loaded 3949561 rows
+3949561 total comments
+3656583 total comments after filtering
+3656583 comments after limiting
+Split into 2560128 training and 1096455 test comments
+Learning using Binary Naive Bayes
+Actual (training) distribution:
+Median: 3.0
+< Median: 3011861 (0.8236818362936107)
+>= Median: 644722 (0.17631816370638928)
+Displaying top 10 features
+[-2.847296809643126] Word
+[-2.9069182729810183] Feature 262144
+[-4.611846589353812] Word just
+[-4.635917844146649] Word like
+[-4.86921724243556] Word dont
+[-4.888664204120262] Word im
+[-4.934429156133955] Word people
+[-5.307756879564348] Word time
+[-5.435043351515574] Word think
+[-5.435665586328273] Word know
+Displaying bottom 10 features
+[-17.161352898731575] Word stemle
+[-17.161352898731575] Word fontcourier
+[-17.161352898731575] Word directiongtltmarqueegtltmarquee
+[-17.161352898731575] Word aleksey
+[-17.161352898731575] Word lipatov
+[-17.161352898731575] Word sanderscolonel
+[-17.161352898731575] Word weena
+[-17.161352898731575] Word advorange
+[-17.161352898731575] Word lt3lt3
+[-17.161352898731575] Word ucrossynz
+Test accuracy: 0.7932810740066851
+Split into 2560128 training and 1096455 test comments
+Learning using Logistic Regression
+Actual (training) distribution:
+Median: 3.0
+< Median: 3011861 (0.8236818362936107)
+>= Median: 644722 (0.17631816370638928)
+Displaying top 10 features
+[81.24675049935888] Word originaloriginal
+[62.68766433476006] Word gtinterestingly
+[50.10516331970163] Word shankly
+[49.82350962673481] Word furbished
+[49.472495789467665] Word halfcousin
+[48.06715912210299] Word 10us
+[47.138421093076936] Word bigfish
+[45.86323882036496] Word achaeans
+[42.85959429478345] Word counterterrorist
+[42.3806857450535] Word brandishes
+Displaying bottom 10 features
+[-78.71101234900749] Word apporpriate
+[-62.44860286865728] Word markusmarcus
+[-61.53777355392058] Word bittough
+[-59.27383339972644] Word gtanwar
+[-58.71505167175653] Word sidelocal
+[-57.79633403848769] Word australiana
+[-56.36786186880998] Word ucadllmn
+[-53.95550011110626] Word mellified
+[-52.74602802484321] Word filmcast
+[-52.506268235114035] Word bolide
+Test accuracy: 0.8292369499888276
+Naive Bayes Test Accuracy: 0.7932810740066851
+Logistic Test Accuracy: 0.8292369499888276

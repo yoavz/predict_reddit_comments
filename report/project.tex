@@ -17,43 +17,46 @@
 
 \section{Abstract}
 
-TODO: write after
+In this report, I approach the problem of predicting the score of a Reddit comment given the body text of the comment. To use as features, I experiment with a bag-of-words model, TF-IDF vectorization, and several more metadata features extracted from the text of each comment. I fit a Ridge Regression model on several different subreddits, achieving a 36.67\% Root Squared Mean Test Error on the subreddit \textit{/r/hiphopheads}. I achieve better results fitting a Logistic Regression on several different subreddits, achieving an 82.4\% precision with a binary classification model on the subreddit \textit{/r/music}, an improvement of 7.4\% over the baseline model. I also achieve a 62.5\% precision with a multi-class classification model on \textit{/r/music}, an improvement of 13.4\% over the baseline model.
 
 \section{Motivation}
 
-Voting systems are a standard part of many online communities. Whether the measure is ``likes'' on a facebook status, “hearts” on a picture in Instagram, or “upvotes” on a submission from Reddit, these voting systems often define which online content receives the most attention. Understanding the dynamics of user behavior in voting systems has applications in the world of online advertising, voting algorithm design, and viral marketing. Reddit is one such website that aggregates link submissions, and allows users to either “upvote” or “downvote” other users comments on submissions. By attempting to formulate a text-based model for predicting Reddit \textit{comment karma} on a given subreddit, we hope to gain insights into what text elements make a comment ``good'' or ``bad''.
+Voting systems are a standard part of many online communities. Whether the measure is ``likes'' on a facebook status, “hearts” on a picture in Instagram, or “upvotes” on a submission from Reddit, these voting systems often define which online content receives the most attention. Understanding the dynamics of user behavior in voting systems has applications in the world of online advertising, voting algorithm design, and viral marketing. Reddit is one such website that aggregates link submissions, and allows users to either “upvote” or “downvote” other users comments on submissions. By attempting to formulate a text-based model for predicting Reddit \textit{comment karma} on a given subreddit, I hope to gain insights into what text elements make a comment ``good'' or ``bad''.
 
 \section{Background}
 
-Although there has some previous academic research on the subject of on the popularity of online content, there has been very little work exploring the prediction of the popularity of user-generated text, in particular. Szabo \cite{predict_digg} was able to forecast the long-term (30 day) popularity of Digg content with relative success using short-term (2 hour) user access and popularity data. There have been several student projects of specifically attempting to predict popularity of user-submitted comments of websites such as HackerNews and Reddit. Lamberson et. Al \cite{lamberson} is a project that uses a large variety of features to attempt to predict scores of Reddit comments by using a prediction model. Lakkaraju is another student project that attempts predicting the score of top-level reddit submissions (note the difference from \textit{comments}). 
+Although there has some previous academic research on the subject of on the popularity of online content, there has been very little work exploring the prediction of the popularity of user-generated text, in particular. Szabo \cite{predict_digg} was able to forecast the long-term (30 day) popularity of Digg content with relative success using short-term (2 hour) user access and popularity data. There have been several student projects of specifically attempting to predict popularity of user-submitted comments of websites such as HackerNews and Reddit. Lamberson et. Al \cite{lamberson} is an example student project that uses a large variety of features to attempt to predict scores of Reddit comments by using a prediction model. 
 
 \section{Data}
 	\subsection{Dataset}
-	The dataset used in this project was using the publicly available dataset of 1.7 billion reddit comments \cite{dataset}. Although this dataset is very large, the features are relatively sparse; each comment only consists of basic features such as body text, author, time posted, and score of the comment. To narrow down to a more usuable data set, only comments from the month of September 2015 were used. Next comments were grouped by subreddit so that seperate models could be trained on each subreddit. The following are some example counts of amounts of comments:
+	The dataset used in this project was using the publicly available dataset of 1.7 billion reddit comments \cite{dataset}. Although this dataset is very large, the features are relatively sparse; each comment only consists of basic features such as body text, author, time posted, and score of the comment. To narrow down to a more usuable data set, only comments from the month of September 2015 were used. Next comments were grouped by subreddit so that seperate models could be trained on each subreddit. Table \ref{size_table} shows the size of various subreddits used through this project.
 	
 	\begin{table}[h!]
 	\centering
-	\begin{tabular}{  c | c  c  c | }
-	\cline{2-4}
-	 & \multicolumn{3}{ |c| } {Feature Variants} \\
+	\begin{tabular}{ | c | c |}
 	\hline
-	\multicolumn{1}{|c|}{Subreddit} & Bag & TF-IDF & Metadata \\
-	 \hline
-	 \hline
-	\multicolumn{1}{|c|}{/r/askreddit} & 144.70 & 147.24 & 118.76 \\
+	Subreddit & Number of Comments \\
 	\hline
-	\multicolumn{1}{|c|}{/r/movies} & 85.39 & 84.39 & 53.43 \\
 	\hline
-	\multicolumn{1}{|c|}{/r/hiphopheads} & 36.67 & 36.71 & 38.63 \\
+	/r/askreddit & 1,000,000 \\
 	\hline
-	\multicolumn{1}{|c|}{/r/askscience} & 117.95 & 122.12 & 116.28 \\
+	/r/videos & 550,192 \\
+	\hline
+	/r/movies & 288,522 \\
+	\hline
+	/r/hiphopheads & 137,363 \\
+	\hline
+	/r/music & 114,458 \\
+	\hline
+	/r/askscience & 27,747 \\
 	\hline
 	\end{tabular}
-	\caption{Linear Regression on 10k comment subsets}
+	\caption{Size of subreddit datasets}
+	\label{size_table}
 	\end{table}
 	
 	\subsection{Features}
-	The most significant feature used in experiments was a vector representing the text body. First, the text body was tokenized on whitespace and stripped of non-alphanumeric characters. Then, there two approaches to vectorize this list of tokens. One is a unigram \textbf{bag-of-words model} in which the value $c_i$ corresponds to the amount of time token $w_i$ appears in the comment body. Another representation often used on text corpus' is \textbf{Term-Frequency $\cdot$Inverse-Term-Frequency} (TFIDF), where the term frequency is the same counts value as in the bag-of-words model, and the inverse term frequency is a measure of how much information a ``word'' provides.
+	The most significant feature used in experiments was a vector representing the text body. First, the text body was tokenized on whitespace and stripped of non-alphanumeric characters. Two approaches were used to vectorize this list of tokens. One is a unigram \textbf{bag-of-words model} in which the value $c_i$ corresponds to the amount of time token $w_i$ appears in the comment body. Another representation often used on text corpus' is \textbf{Term-Frequency $\cdot$Inverse-Term-Frequency} (TFIDF), where the term frequency is the same counts value as in the bag-of-words model, and the inverse term frequency is a measure of how much information a ``word'' provides.
 	
 	\begin{gather*}
 		idf(t) = log \bigg( \frac{\sum_{d \in D}{1}}{\sum_{d \in D; t \in d}{1}} \bigg)
@@ -61,7 +64,7 @@ Although there has some previous academic research on the subject of on the popu
 		
 	In addition to the body vector features, there were 7 metadata features extracted from each comment:
 	\begin{enumerate}
-		\setlength\itemsep{0em}
+		\setlength\itemsep{-0.3em}
 		\item Character Count
 		\item Token Count
 		\item Average Token Length
@@ -72,22 +75,18 @@ Although there has some previous academic research on the subject of on the popu
 	\end{enumerate}
 
 \section{Models}
-	There are two families of models that may be applied to this problem.
+	There were two families of models  applied to this problem.
 	
 	\subsection{Regression}
-	The most intutive model to predict the score of a comment given it's features is to use a regression model. An advantage of a regression model is it naturally maps well to the dataset, as the score labels associated with each comment are ``continuous'' integers. A Ridge Regression model was used, which learns a weight vector $\mathbf{w}$ over the following loss function:
-	\begin{gather*}
-		\sum^N{ (\mathbf{w^T} \mathbf{x_n} - \mathbf{y_n})^2} + \lambda \sum^N{ w }
-	\end{gather*}
-	where $\lambda$ is a hyperparameter tuned by cross-validation testing.
+	The most intutive model to predict the score of a comment given it's features is to use a regression model. An advantage of a regression model is it naturally maps well to the dataset, as the score labels associated with each comment are ``continuous'' integers. The Ridge Regression algorithm was used, where the regularization parameter $\lambda$ was tuned by cross-validation testing.
 	
 	\subsection{Classification}
 	Another approach to modeling this problem is to bucket the comments into $k$ score buckets and then run a classification algorithm on them. The two classification algorithms experimented with were Logistic Regression and Multinomial Naive Bayes. \\
 	\\ 
-	This model includes several complications that do not arise in the case of regression. First, the number of buckets introduces another ``hyperparameter'' into the algorithm- with a larger amount of buckets the model will have predict a finer granularity of scores, but too many buckets will result in a too difficult of a model to learn. In addition, the distribution of the dataset was heavily skewed towards lower scored comments in the range of 0-5.
+	Classification does introduce a complication that does not arise in the case of regression. The number of buckets introduces another ``hyperparameter'' into the algorithm- with a larger amount of buckets the model will have predict a finer granularity of scores, but too many buckets will result in a too difficult of a model to learn. 
 		
 		\subsubsection{Bucket Classification}
-		To address these complications, one can assign each comment to a score bucket according to a log scale, which was one approach taken
+		To address the skewed nature of the dataset towards lower scores, comments were assigned to a score bucket according to a log scale.
 		\begin{gather*}
 			bucket_n = \begin{cases}
 				0 & score_n \le 0 \\
@@ -97,10 +96,10 @@ Although there has some previous academic research on the subject of on the popu
 	
 	
 		\subsection{Special Case: Binary Classification}
-		Another approach is to cut the score of each comment at a threshold and divide the dataset into ``positive'' and ``negative'' comments. Note that this is a special case of bucket classification above, where number of buckets is equal to 2. As with above, Logistic Regression and Multinomial Naive Bayes models can be learned over the training data. The advantage to this model is that it is the least complex, and easiest to learn over. The large disadvantage to this model is that there is very little granularity and it is therefore not much use to map a comment to it's final score. Still, this model may give us some insight in feature analysis.
+		Another approach was to decide on a score threshold to divide the dataset into ``positive'' and ``negative'' comments. Note that this is a special case of bucket classification above, where number of buckets is equal to 2. As with above, Logistic Regression and Multinomial Naive Bayes models can be learned over the training data. This simple model is the easiest to learn over, but gives us the least granularity in the task of predicting a new reddit comment.
 
 \section{Implementation}
-	The large size of the dataset proved to be the most challenging part of this project. The feature processing and learning models were implemented using the Apache Spark \cite{spark} distributed computing framework. The Spark framework was a good fit due to it's capabilities for distributed computation and that it comes with the MLLib API for Ridge Regression, Multinomial Naive Bayes, . Spark also comes with helper scripts to set up clusters to run on Amazon's EC2 cloud computing services. A cluster of 4 machines on Amazon EC2 were used to train models with greater than 300,000 comments. \\
+	The large size of the dataset proved to be the most challenging part of this project. The feature processing and learning models were implemented using the Apache Spark \cite{spark} distributed computing framework. The Spark framework was a good fit due to it's capabilities for distributed computation and that it comes with the MLLib API for Ridge Regression, Multinomial Naive Bayes, and Logistic Regression. Spark also comes with helper scripts to set up clusters to run on Amazon's EC2 cloud computing services. A cluster of 4 machines on Amazon EC2 were used to train models with greater than 300,000 comments. \\
 	\\
 	When creating the bag of words model, the vocabulary size was limited to a maximum of 50,000 of the most frequently used words for scalability reasons. Simillarly, for TF-IDF vectorization the hashing trick \cite{hashing} was used to restrict the feature vector to a maximum of 50,000 words. 
 
@@ -112,12 +111,12 @@ Although there has some previous academic research on the subject of on the popu
 		\sqrt{\cfrac{\sum^N{(\mathbf{w^T} \mathbf{x_n} - \mathbf{y_n})^2}}{N}}
 	\end{gather*}
 	
-	The table below shows the testing RMSE after training and testing on 10,000 comment subset of four different subreddits. Each set of comments was split into 70\% training and 30\% testing. The three variants of feature vectors used were:
+	Table \ref{reg_table} shows the testing RMSE after training and testing on 10,000 comment subset of four different subreddits. Each set of comments was split into 70\% training and 30\% testing. The three variants of feature vectors used were:
 	\begin{enumerate}
 		\setlength\itemsep{0em}
 		\item Bag of Words + Metadata features
 		\item TF-IDF + Metadata features
-		\item Only metadata features
+		\item Only Metadata features
 	\end{enumerate}
 	
 	\begin{table}[h!]
@@ -139,33 +138,57 @@ Although there has some previous academic research on the subject of on the popu
 	\hline
 	\end{tabular}
 	\caption{Linear Regression on 10k comment subsets}
+	\label{reg_table}
 	\end{table}
 
-	None of the results above are satisfactory, with TF-IDF performing very similary to Bag of Words, and metadata features even outperforming both in some cases. With this small and noisy, the models are \textit{severely overfitting} to the training set, as evidenced by the following plot of training and testing RMSE against the regularization parameter $\lambda$.
+	None of the results are able to reach a satisfactory RMSE. The feature variant does not seem to have much of an effect; TF-IDF performs very similar to Bag of Words, and metadata features even outperform both in some cases. With this small and noisy dataset, the models are \textit{severely overfitting} to the training set, as evidenced by Figure \ref{movies_plot_10k}, which shows training and testing RMSE against different values of regularization parameter $\lambda$.
 	
 	\begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.8\linewidth]{movies_plot_10k.png}
-	\label{movies_plot_10k}
 	\caption{RMSE against $\lambda$ for /r/movies}
+	\label{movies_plot_10k}
 	\end{figure}
 	
-	The following table shows 
+	Figure \ref{full_reg} shows the results of larger scale learning using the Bag of Words feature variant and the entire comment dataset for each subreddit. As can be seen, increasing the size of the dataset has very little effect on the final test RMSE of the model. In the case of the subreddit \textit{/r/askreddit}, for example, the test error actually increases, although the model is learned over 1,000,000 comments instead of the previous 10,000 comments.
 	
-	\subsection{Multi-Class Classification}
-	To evaluate the effectiveness of classification models, the \textbf{precision} of several different 
-	
-	TODO: put in multi-class classification graphs
+	\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.9\linewidth]{full_reg.png}
+	\caption{Linear Regression on full comment datasets}
+	\label{full_reg}
+	\end{figure}
 	
 	\subsection{Binary Classification}
+	The metric used to evaluate the effectiveness of classification models was the \textbf{precision}, or the percentage of comments that are successfully assigned to the correct class by the trained model.
 	
-	TODO: put in binary classification graphs and discuss results
+	\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.9\linewidth]{full_bin_class.png}
+	\caption{Binary Classification}
+	\label{full_bin_class}
+	\end{figure}
+	
+	Figure \ref{full_bin_class} shows the precision of the Naive Bayes and Logistic Regression models on several different subreddits. It is also displayed next to the baseline model precision, which ignores the features and predicts a class based on the prior probabilities of the two classes. Logistic Regression consistently performed better than Naive Bayes and the baseline by a small amount. The best performing model is Logistic Regression on the \textit{/r/movies} subreddit, achieving a 7.4\% improvement over the baseline model to achieve an 82.4\% precision.
 
-	The first several results 
+	\subsection{Multi-Class Classification}
+	
+	\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.9\linewidth]{full_multi_class.png}
+	\caption{Multi-Class Classification}
+	\label{full_multi_class}
+	\end{figure}
+
+	Figure \ref{full_multi_class} shows the precision of the Naive Bayes and Logistic Regression (with the three feature variants) next to the baseline model on several subreddits. In all cases, both prediction models do better than the baseline. The most successful prediction model is a Logistic Regression on /r/music, where it improves the precision of the baseline by 13.4\% to achieve a 62.5\% precision over 14 score buckets.
+	
+\section{Analysis}
+
+	The performance of the models were varied, depending on subreddit. In general, the classification models performed better than the regression models, but neither performed spectacularly. There are several potential reasons for why this is. One reason may be that the simple tokenization and metadata feauteres do not correctly capture the inherent quality of a comment. The correlation between reddit comments and score may be mostly a function of other contextual comment features, or is embedded in a deeper semantics that are not properly conveyed by bag of words. Another potential reason is insufficient data; many ambitious text and image learning problems take days or weeks to train before any meaningful results are reached.
 
 \section{Future Work}
 	
-	After dissapointing results 
+	In future work, it would be useful to augment the data set with a richer set of features that includes context about the parent post and surrounding posts. For example, perhaps the score of a parent post or sibling post(s) are correlated with the score of the given comment. Although richer features such as context are not part of the 1.7 billion reddit comment dataset, it is possible to build a web crawler to access additional features. There are also richer features that could be introduced over the original dataset, such as word2vec \cite{word2vec}, which maps each token to a semantic vector space. Perhaps certain areas of the comment body, such as the last sentence or the first sentence, are more important in deciding the final score. Unfortunetely, this options could not be explored in this project due to time constraints.
 
 
 \bibliographystyle{acm}

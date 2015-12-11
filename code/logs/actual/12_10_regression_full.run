@@ -1,0 +1,163 @@
+Loading from bigquery bucket: cs260-1128:15_09.askreddit
+Loaded 3949561 rows
+3949561 total comments
+3656583 total comments after filtering
+1000000 comments after limiting
+Split into 700147 training and 299853 test comments
+Learning using Ridge Regression
+Training RMSE: 125.32229235404913, Best Lambda: 8.0
+Displaying top 10 features
+[3176.5642483459233] Word quitler
+[1971.215348399649] Word finetuned
+[1814.8336605404982] Word sported
+[1779.888124031941] Word durning
+[1237.0744150660514] Word vidkun
+[1166.6198399067473] Word limps
+[1107.2706073980487] Word ebolas
+[1068.573531297535] Word edit3
+[1052.015085330172] Word exacting
+[1039.8974963586413] Word extramarital
+Displaying bottom 10 features
+[-373.0132520779336] Word lapses
+[-372.40980074384856] Word erich
+[-356.7953348525824] Word bennigans
+[-349.0813892706505] Word qin
+[-300.50630789531044] Word commision
+[-276.7225531037992] Word misadventures
+[-266.88440773584574] Word underscore
+[-264.782470419311] Word rigidity
+[-250.76573903956435] Word 1102
+[-247.85232012237353] Word qm
+Testing RMSE: 149.42342363758016
+Split into 700147 training and 299853 test comments
+Learning using Ridge Regression
+Training RMSE: 126.27909667653091, Best Lambda: 8.0
+Displaying top 10 features
+[229.86346762138837] Feature 46824
+[107.14151455550873] Feature 12750
+[94.74713799136488] Feature 29296
+[93.95928277126042] Feature 15758
+[91.61563925667646] Feature 20950
+[88.1156690053125] Feature 40699
+[74.85925920911401] Feature 36173
+[74.06192600559] Feature 45552
+[73.55582810318381] Feature 23189
+[72.06706583296415] Feature 9292
+Displaying bottom 10 features
+[-169.1593546211544] Feature 48222
+[-70.72079807962344] Feature 14236
+[-57.28826171982243] Feature 21447
+[-52.85488497975505] Feature 27718
+[-50.92545455538235] Feature 41969
+[-42.91462922392588] Feature 6385
+[-38.02187067161829] Feature 11427
+[-36.61934083822137] Feature 21919
+[-31.866230262708555] Feature 3861
+[-30.274775761018205] Feature 25747
+Testing RMSE: 150.20181212658144
+Split into 700147 training and 299853 test comments
+Learning using Ridge Regression
+Loading from bigquery bucket: cs260-1128:15_09.videos
+Loaded 602538 rows
+602538 total comments
+550192 total comments after filtering
+550192 comments after limiting
+Using bag of words feature pipeline
+Split into 384664 training and 165528 test comments
+Learning using Ridge Regression
+Loading from bigquery bucket: cs260-1128:15_09.videos
+Loaded 602538 rows
+602538 total comments
+550192 total comments after filtering
+550192 comments after limiting
+Using bag of words feature pipeline
+Split into 384664 training and 165528 test comments
+Learning using Ridge Regression
+Training RMSE: 99.23057004924877, Best Lambda: 8.0
+Displaying top 10 features
+[1260.8887926475345] Word policecity
+[1212.7100581624536] Word rationalized
+[1157.6596913812223] Word dayi
+[1051.9666233900073] Word cartwheel
+[979.5171348985533] Word townhouse
+[936.5679556519389] Word schizos
+[925.3715267170403] Word emigrated
+[852.6855935190599] Word countertops
+[841.7299138761977] Word hobbits
+[823.3897226334511] Word civilisations
+Displaying bottom 10 features
+[-833.6741852997277] Word perfunctory
+[-706.6828234162988] Word uleeham721
+[-419.24551616784976] Word undergrads
+[-407.8796625319054] Word dogsitter
+[-381.89124283743655] Word dibbs
+[-354.52831147489235] Word atonal
+[-337.96235523890203] Word closedminded
+[-336.00757939029205] Word anosmic
+[-326.4903359985443] Word broadside
+[-301.42286744732996] Word forts
+Testing RMSE: 112.44807444760023
+Loading from bigquery bucket: cs260-1128:15_09.music
+Loaded 123794 rows
+123794 total comments
+114458 total comments after filtering
+114458 comments after limiting
+Using bag of words feature pipeline
+Split into 79964 training and 34494 test comments
+Learning using Ridge Regression
+Training RMSE: 45.748853528540685, Best Lambda: 8.0
+Displaying top 10 features
+[1880.3300532232124] Word blackkeysmatter
+[1620.9917344586197] Word gamertag
+[1204.086303748956] Word frolicking
+[1030.1765940178484] Word pledged
+[897.5410404928083] Word jeb
+[885.3600363675725] Word smartass
+[821.2096159720616] Word proofhttpswwwredditcomrmusiccomments3mqyphtatuallthethingsshesaidpop2003cvhmf7s
+[821.2096159720616] Word 15mbit
+[724.9244693770784] Word allmusiccom
+[712.3291843831744] Word beatmaker
+Displaying bottom 10 features
+[-899.500594487311] Word apophenia
+[-547.4817592825506] Word clownin
+[-545.013982076733] Word advices
+[-539.4437978716325] Word halfbaked
+[-481.05828591332244] Word electrician
+[-437.0966205502328] Word rapsinging
+[-437.0966205502328] Word fuuuuuuck
+[-400.7172956840695] Word x3
+[-400.0728515723159] Word prolife
+[-386.7414091240569] Word kewli
+Testing RMSE: 79.43285050146
+Loading from bigquery bucket: cs260-1128:15_09.movies
+Loaded 308777 rows
+308777 total comments
+288522 total comments after filtering
+288522 comments after limiting
+Using bag of words feature pipeline
+Split into 201939 training and 86583 test comments
+Learning using Ridge Regression
+Training RMSE: 67.05537974409339, Best Lambda: 8.0
+Displaying top 10 features
+[1870.3797240025735] Word legality
+[1730.2472165836118] Word diedhttplisajakubnet20140811farewelltorobinwilliamsathankyounote
+[1361.889253712955] Word accidentaly
+[1180.1474453312421] Word charmless
+[1082.2477211548457] Word porky
+[1054.4071382311172] Word looted
+[1023.4222554358477] Word mingling
+[987.1163564952091] Word seouloh
+[923.0904035161251] Word raimimaguire
+[908.077833863598] Word pear
+Displaying bottom 10 features
+[-907.3138821306436] Word gtdonnie
+[-653.4917371092702] Word jakubs
+[-653.348920019611] Word bwaaah
+[-579.1121052269228] Word vertebrae
+[-577.0398513429684] Word httplisajakubnet20130322hellomynameis
+[-532.473282365682] Word steamrolled
+[-527.801523616486] Word randal
+[-516.8282328686315] Word bonzai
+[-511.33112668252187] Word ganz
+[-486.33759689452484] Word preparations
+Testing RMSE: 87.21237015863323

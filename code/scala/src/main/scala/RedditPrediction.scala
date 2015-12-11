@@ -260,7 +260,7 @@ object RedditPrediction {
     } else if (config.mode == "logistic") {
       log.info("Learning using Logistic Regression");
       val logistic = new RedditLogisticRegression();
-      logistic.trainWithRegularization(train, regs)
+      logistic.trainReg(train, config.reg_param)
       val test_accu: Double = logistic.test(test)
 
       val bucketizer: CommentBucketizerModel = 
@@ -316,6 +316,7 @@ object RedditPrediction {
       // regr.getRegressionModel.summary.objectiveHistory.zipWithIndex.foreach{ 
       //   case (hist, iter) => log.info(s"Iteration ${iter}: ${hist}")
       // }
+      return test_rmse
     }
     0.0
   }
